@@ -1,0 +1,39 @@
+{
+    "users": [
+        {
+            "username": "admin",
+            "password": "admin123",
+            "role": "admin"
+        },
+        {
+            "username": "customer1",
+            "password": "customer123",
+            "role": "customer"
+        }
+    ],
+    "decks": [
+        {
+            "deckName": "Math Basics",
+            "description": "A deck for learning basic math concepts",
+            "userId": "652f3b7f9d1f8c001f87f9d3",
+            "cards": ["652f3b7f9d1f8c001f87fa00", "652f3b7f9d1f8c001f87fa01"]
+        }
+    ],
+    "cards": [
+        {
+            "frontCard": "2 + 2",
+            "backCard": "4"
+        },
+        {
+            "frontCard": "5 x 3",
+            "backCard": "15"
+        }
+    ],
+    "requests": [
+        {
+            "deckId": "652f3b7f9d1f8c001f87f9d5",
+            "userId": "652f3b7f9d1f8c001f87f9d6",
+            "status": "pending"
+        }
+    ]
+}
