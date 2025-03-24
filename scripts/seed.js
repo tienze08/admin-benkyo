@@ -11,10 +11,14 @@ const Request = require('../models/requestModel');
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGODB_URI).then(() => {
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
     console.log('Connected to MongoDB');
 }).catch((err) => {
     console.error('Error connecting to MongoDB', err);
+    process.exit(1);
 });
 
 const seedDatabase = async () => {
@@ -24,21 +28,29 @@ const seedDatabase = async () => {
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
 
         // Xóa dữ liệu cũ
-        await User.deleteMany({});
-        await Deck.deleteMany({});
-        await Card.deleteMany({});
-        await Request.deleteMany({});
+        await Promise.all([
+            User.deleteMany({}),
+            Deck.deleteMany({}),
+            Card.deleteMany({}),
+            Request.deleteMany({})
+        ]);
 
         // Thêm người dùng (mã hóa mật khẩu)
         const users = await Promise.all(data.users.map(async user => {
-            const hashedPassword = await bcrypt.hash(user.password, 10);
             return {
+                name: user.name || user.username,
                 username: user.username,
-                password: hashedPassword,
+                password: await bcrypt.hash(user.password, 10),
                 role: user.role
             };
         }));
-        await User.insertMany(users);
+        const insertedUsers = await User.insertMany(users);
+
+        // Tạo một map userId để thay thế trong decks và requests
+        const userMap = {};
+        insertedUsers.forEach(user => {
+            userMap[user.username] = user._id;
+        });
 
         // Thêm thẻ (Card) trước để lấy ID
         const insertedCards = await Card.insertMany(data.cards);
@@ -53,16 +65,22 @@ const seedDatabase = async () => {
         const decks = data.decks.map(deck => ({
             deckName: deck.deckName,
             description: deck.description,
-            userId: new mongoose.Types.ObjectId(deck.userId),  // Chuyển userId thành ObjectId
-            cards: deck.cards.map(cardName => cardMap[cardName]), // Chuyển cards thành ObjectId
+            userId: userMap[deck.userId] || new mongoose.Types.ObjectId(),
+            cards: deck.cards.map(cardFront => cardMap[cardFront] || new mongoose.Types.ObjectId())
         }));
-        await Deck.insertMany(decks);
+        const insertedDecks = await Deck.insertMany(decks);
+
+        // Tạo một map deckId để thay thế trong requests
+        const deckMap = {};
+        insertedDecks.forEach(deck => {
+            deckMap[deck.deckName] = deck._id;
+        });
 
         // Thêm yêu cầu (Request)
         const requests = data.requests.map(request => ({
-            deckId: new mongoose.Types.ObjectId(request.deckId),
-            userId: new mongoose.Types.ObjectId(request.userId),
-            status: request.status || 'pending',
+            deckId: deckMap[request.deckId] || new mongoose.Types.ObjectId(),
+            userId: userMap[request.userId] || new mongoose.Types.ObjectId(),
+            status: request.status || 'pending'
         }));
         await Request.insertMany(requests);
 

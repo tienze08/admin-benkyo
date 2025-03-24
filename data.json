@@ -3,30 +3,50 @@
         {
             "username": "admin",
             "password": "admin123",
-            "role": "admin"
+            "name": "Admin User",
+            "role": "admin",
+            "avatar": "https://i.pravatar.cc/150?img=1"
         },
         {
             "username": "customer1",
             "password": "customer123",
-            "role": "customer"
+            "name": "John Doe",
+            "role": "customer",
+            "avatar": "https://i.pravatar.cc/150?img=2"
         }
     ],
     "decks": [
         {
-            "deckName": "Math Basics",
-            "description": "A deck for learning basic math concepts",
+            "deckName": "Spanish Vocabulary for Beginners",
+            "description": "A comprehensive deck of common Spanish words and phrases for beginners.",
             "userId": "652f3b7f9d1f8c001f87f9d3",
-            "cards": ["652f3b7f9d1f8c001f87fa00", "652f3b7f9d1f8c001f87fa01"]
+            "cards": ["652f3b7f9d1f8c001f87fa00", "652f3b7f9d1f8c001f87fa01"],
+            "cardsCount": 120
+        },
+        {
+            "deckName": "Advanced Javascript Concepts",
+            "description": "Detailed flashcards on advanced JavaScript concepts including closures, promises, and async/await.",
+            "userId": "652f3b7f9d1f8c001f87f9d4",
+            "cards": ["652f3b7f9d1f8c001f87fa02", "652f3b7f9d1f8c001f87fa03"],
+            "cardsCount": 85
         }
     ],
     "cards": [
         {
-            "frontCard": "2 + 2",
-            "backCard": "4"
+            "frontCard": "Hola",
+            "backCard": "Hello"
         },
         {
-            "frontCard": "5 x 3",
-            "backCard": "15"
+            "frontCard": "Gracias",
+            "backCard": "Thank you"
+        },
+        {
+            "frontCard": "What is a closure in JavaScript?",
+            "backCard": "A closure is a function that remembers the scope in which it was created."
+        },
+        {
+            "frontCard": "What does async/await do?",
+            "backCard": "It allows handling asynchronous operations in a synchronous-like manner."
         }
     ],
     "requests": [
@@ -34,6 +54,13 @@
             "deckId": "652f3b7f9d1f8c001f87f9d5",
             "userId": "652f3b7f9d1f8c001f87f9d6",
             "status": "pending"
+        },
+        {
+            "deckId": "652f3b7f9d1f8c001f87f9d7",
+            "userId": "652f3b7f9d1f8c001f87f9d8",
+            "status": "approved",
+            "reviewedBy": "652f3b7f9d1f8c001f87f9d9",
+            "reviewNote": "Great content!"
         }
     ]
 }
