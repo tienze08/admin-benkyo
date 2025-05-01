@@ -1,0 +1,62 @@
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Index from "./pages/Index";
+import Revenue from "./pages/Revenue";
+import NotFound from "./pages/NotFound";
+import Settings from "./pages/Setting";
+import Accounts from "./pages/Accounts";
+import Decks from "./pages/Decks";
+import ReviewRequest from "./pages/ReviewRequest";
+import AdminLogin from "./pages/AdminLogin";
+
+const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = !!localStorage.getItem("token");
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+const protectedRoutes = [
+  { path: "/", element: <Index /> },
+  { path: "/accounts", element: <Accounts /> },
+  { path: "/revenue", element: <Revenue /> },
+  { path: "/decks", element: <Decks /> },
+  { path: "/settings", element: <Settings /> },
+  { path: "/review/:id", element: <ReviewRequest /> },
+];
+
+const publicRoutes = [
+  { path: "/login", element: <AdminLogin /> },
+  { path: "*", element: <NotFound /> },
+];
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          {publicRoutes.map(({ path, element }) => (
+            <Route key={path} path={path} element={element} />
+          ))}
+
+          {/* Protected routes */}
+          {protectedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<ProtectedRoute>{element}</ProtectedRoute>}
+            />
+          ))}
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+
+export default App;
