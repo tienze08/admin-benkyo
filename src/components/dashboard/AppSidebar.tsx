@@ -134,7 +134,7 @@ import { logout } from "@/hooks/auth";
         {/* Add expand button that shows when sidebar is collapsed */}
         {isCollapsed && (
           <div className="fixed left-0 top-1/2 -translate-y-1/2 z-20">
-            <Button 
+            <Button  
               variant="secondary" 
               size="icon" 
               className="h-8 w-8 rounded-full rounded-l-none shadow-md"

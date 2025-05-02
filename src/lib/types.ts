@@ -1,5 +1,4 @@
-
-export type RequestStatus = 'pending' | 'approved' | 'rejected';
+export type RequestStatus = 1 | 2 | 3;
 
 export interface FlashcardDeckRequest {
   id: string;

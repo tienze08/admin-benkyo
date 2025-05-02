@@ -5,93 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useRequests } from "@/hooks/use-requests";
 import { cn } from "@/lib/utils";
 import { Plus, Search, Filter, Check, X, Clock, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Mock data
-const decks = [
-  {
-    id: "1",
-    title: "Marketing Strategy 2025",
-    author: "John Smith",
-    category: "Marketing",
-    status: "approved" as const,
-    date: "Apr 10, 2025",
-  },
-  {
-    id: "2",
-    title: "Q4 Financial Report",
-    author: "Alice Johnson",
-    category: "Finance",
-    status: "pending" as const,
-    date: "Apr 8, 2025",
-  },
-  {
-    id: "3",
-    title: "Product Roadmap",
-    author: "Robert Brown",
-    category: "Product",
-    status: "rejected" as const,
-    date: "Apr 5, 2025",
-  },
-  {
-    id: "4",
-    title: "Brand Guidelines",
-    author: "Emma Davis",
-    category: "Marketing",
-    status: "approved" as const,
-    date: "Apr 3, 2025",
-  },
-  {
-    id: "5",
-    title: "Investor Presentation",
-    author: "Michael Wilson",
-    category: "Finance",
-    status: "pending" as const,
-    date: "Apr 1, 2025",
-  },
-  {
-    id: "6",
-    title: "Employee Handbook",
-    author: "Sophia Martin",
-    category: "HR",
-    status: "approved" as const,
-    date: "Mar 28, 2025",
-  },
-  {
-    id: "7",
-    title: "Quarterly Sales Report",
-    author: "James Taylor",
-    category: "Sales",
-    status: "pending" as const,
-    date: "Mar 25, 2025",
-  },
-  {
-    id: "8",
-    title: "User Research Findings",
-    author: "Olivia White",
-    category: "UX",
-    status: "approved" as const,
-    date: "Mar 20, 2025",
-  },
-  {
-    id: "9",
-    title: "Engineering Sprint Plan",
-    author: "William Harris",
-    category: "Engineering",
-    status: "rejected" as const,
-    date: "Mar 18, 2025",
-  },
-  {
-    id: "10",
-    title: "Content Calendar",
-    author: "Ava Clark",
-    category: "Marketing",
-    status: "approved" as const,
-    date: "Mar 15, 2025",
-  },
-];
+
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -101,9 +20,14 @@ const statusOptions = [
 ];
 
 const Decks = () => {
-  const pendingCount = decks.filter(deck => deck.status === "pending").length;
-  const approvedCount = decks.filter(deck => deck.status === "approved").length;
-  const rejectedCount = decks.filter(deck => deck.status === "rejected").length;
+
+  const { data: decks = [] } = useRequests();
+
+  console.log("Decks data:", decks);
+  
+  const pendingCount = decks.filter(deck => deck.status === 1).length;
+  const approvedCount = decks.filter(deck => deck.status === 2).length;
+  const rejectedCount = decks.filter(deck => deck.status === 3).length;
 
   return (
     <DashboardLayout >
@@ -203,36 +127,46 @@ const Decks = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {decks.map((deck) => (
+              {decks.map((deck) => {
+                const statusMap = {
+                  1: "pending",
+                  2: "approved",
+                  3: "rejected",
+                };
+
+                const statusString = statusMap[deck.status] || "unknown";
+
+                return (
                   <TableRow key={deck.id} className="hover:bg-muted/50 border-b border-sidebar-border">
                     <TableCell className="font-medium">{deck.title}</TableCell>
-                    <TableCell>{deck.author}</TableCell>
-                    <TableCell>{deck.category}</TableCell>
+                    <TableCell>{deck.creator.name}</TableCell>
+                    <TableCell>{deck.description}</TableCell>
                     <TableCell>
                       <Badge
                         className={cn(
-                          "flex w-fit items-center gap-1 ",
-                          deck.status === "approved" && "bg-dashboard-light-green text-dashboard-green",
-                          deck.status === "rejected" && "bg-dashboard-light-red text-dashboard-red",
-                          deck.status === "pending" && "bg-dashboard-light-orange text-dashboard-orange"
+                          "flex w-fit items-center gap-1",
+                          statusString === "approved" && "bg-dashboard-light-green text-dashboard-green",
+                          statusString === "rejected" && "bg-dashboard-light-red text-dashboard-red",
+                          statusString === "pending" && "bg-dashboard-light-orange text-dashboard-orange"
                         )}
                       >
-                        {deck.status === "approved" && <Check className="h-3 w-3" />}
-                        {deck.status === "rejected" && <X className="h-3 w-3" />}
-                        {deck.status === "pending" && <Clock className="h-3 w-3" />}
-                        {deck.status.charAt(0).toUpperCase() + deck.status.slice(1)}
+                        {statusString === "approved" && <Check className="h-3 w-3" />}
+                        {statusString === "rejected" && <X className="h-3 w-3" />}
+                        {statusString === "pending" && <Clock className="h-3 w-3" />}
+                        {statusString.charAt(0).toUpperCase() + statusString.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{deck.date}</TableCell>
+                    <TableCell>{deck.createdAt}</TableCell>
                     <TableCell className="text-right">
-                    <Link to={`/review/${deck.id}`}>
+                      <Link to={`/review/${deck.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <ExternalLink className="h-4 w-4" />
+                          <ExternalLink className="h-4 w-4" />
                         </Button>
-                    </Link>
+                      </Link>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+              })}
               </TableBody>
             </Table>
           </CardContent>
