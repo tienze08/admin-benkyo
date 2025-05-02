@@ -29,6 +29,16 @@ const Decks = () => {
   const approvedCount = decks.filter(deck => deck.status === 2).length;
   const rejectedCount = decks.filter(deck => deck.status === 3).length;
 
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(date);
+  };
+  
+
   return (
     <DashboardLayout >
       <div className="space-y-8">
@@ -156,7 +166,7 @@ const Decks = () => {
                         {statusString.charAt(0).toUpperCase() + statusString.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{deck.createdAt}</TableCell>
+                    <TableCell>{formatDate(deck.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <Link to={`/review/${deck.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">

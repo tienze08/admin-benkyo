@@ -111,35 +111,29 @@ const ReviewRequest = () => {
                     
                     <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Sample Cards</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {[1, 2, 3, 4].map(index => (
-                        <div 
-                            key={index} 
+                    {request.cards && request.cards.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {request.cards.slice(0, 4).map((card, index) => (
+                            <div 
+                            key={card._id} 
                             className="border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors border-sidebar-border"
-                        >
-                            <div className="flex justify-between items-center mb-2 ">
+                            >
+                            <div className="flex justify-between items-center mb-2">
                                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs bg-dashboard-purple text-white">
-                                    Card {index}
+                                Card {index + 1}
                                 </Badge>
                             </div>
-                            <p className="text-sm font-medium mb-1">
-                            {request.title.includes('Spanish') 
-                                ? `¿Cómo se dice "${['hello', 'thank you', 'please', 'goodbye'][index - 1]}" en español?` 
-                                : request.title.includes('Javascript') 
-                                ? ['What is a closure?', 'Explain Promise chaining', 'What is the event loop?', 'Describe destructuring'][index - 1]
-                                : `Sample Question ${index}`}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                            {request.title.includes('Spanish') 
-                                ? `${['Hola', 'Gracias', 'Por favor', 'Adiós'][index - 1]}` 
-                                : request.title.includes('Javascript') 
-                                ? ['A function with access to its outer scope...', 'Using .then() to handle results sequentially', 'Mechanism that handles async operations', 'Unpacking values from arrays or objects'][index - 1]
-                                : `Sample Answer ${index}`}
-                            </p>
-                        </div>
+                            <p className="text-sm font-medium mb-1">{card.front}</p>
+                            <p className="text-xs text-muted-foreground">{card.back}</p>
+                            </div>
                         ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground italic">No sample cards available.</p>
+                    )}
                     </div>
-                    </div>
+
+
                 </CardContent>
                 </Card>
                 
@@ -212,7 +206,7 @@ const ReviewRequest = () => {
                         </CardHeader>
                         <CardContent>
                         <ReviewForm
-                            className="space-y-4"  // Now it works
+                            className="space-y-4"
                             requestId={request.id} 
                             onReviewSubmit={handleReviewSubmit}
                         />

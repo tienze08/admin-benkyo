@@ -1,5 +1,11 @@
 export type RequestStatus = 1 | 2 | 3;
 
+export interface FlashcardCard {
+  _id: string;
+  front: string;
+  back: string;
+}
+
 export interface FlashcardDeckRequest {
   id: string;
   title: string;
@@ -18,4 +24,5 @@ export interface FlashcardDeckRequest {
     name: string;
   };
   reviewNote?: string;
+  cards?: FlashcardCard[];
 }
