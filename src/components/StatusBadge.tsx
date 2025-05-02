@@ -1,3 +1,5 @@
+// StatusBadge.tsx
+
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -9,31 +11,37 @@ interface StatusBadgeProps {
   className?: string;
 }
 
+// Mapping from numeric status to display config
+const statusConfig: Record<RequestStatus, {
+  icon: React.ElementType;
+  variant: string;
+  text: string;
+  className: string;
+}> = {
+  1: {
+    icon: Clock,
+    variant: 'outline',
+    text: 'Pending',
+    className: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
+  },
+  2: {
+    icon: CheckCircle,
+    variant: 'outline',
+    text: 'Approved',
+    className: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+  },
+  3: {
+    icon: XCircle,
+    variant: 'outline',
+    text: 'Rejected',
+    className: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+  }
+};
+
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  // Determine badge styling based on status
-  const statusConfig = {
-    pending: {
-      icon: Clock,
-      variant: 'outline',
-      text: 'Pending',
-      className: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
-    },
-    approved: {
-      icon: CheckCircle,
-      variant: 'outline', 
-      text: 'Approved',
-      className: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
-    },
-    rejected: {
-      icon: XCircle,
-      variant: 'outline',
-      text: 'Rejected',
-      className: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
-    }
-  };
-  
-  const { icon: Icon, text, className: statusClassName } = statusConfig[status];
-  
+  const config = statusConfig[status];
+  const { icon: Icon, text, className: statusClassName } = config;
+
   return (
     <Badge 
       variant="outline" 

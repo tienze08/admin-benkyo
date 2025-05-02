@@ -1,4 +1,3 @@
-
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,23 +8,39 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, CalendarIcon, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { mockDecks } from '@/lib/mockDecks';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-
+import { useRequestById, useReviewRequest } from '@/hooks/use-requests';
+import { RequestStatus } from '@/lib/types';
 
 
 const ReviewRequest = () => {
 
-const { id } = useParams();
-  const navigate = useNavigate();
-  const request = mockDecks.find(deck => deck.id === id);
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { data: request, isLoading, error } = useRequestById(id as string);
+    const reviewRequest = useReviewRequest();
 
-  if (!request) {
-    return <div className="p-4 text-red-500">Deck not found</div>;
-  }
+    if (isLoading) {
+      return <DashboardLayout><div className="p-4">Loading...</div></DashboardLayout>;
+    }
+    
+    if (error) {
+      return <DashboardLayout><div className="p-4 text-red-500">Failed to load request.</div></DashboardLayout>;
+    }
+    
+    if (!request) {
+      return <DashboardLayout><div className="p-4 text-red-500">Request not found.</div></DashboardLayout>;
+    } 
+  
+    console.log("Request data:", request);
 
-  const handleReviewSubmit = (status: 'approved' | 'rejected', note: string) => {
+  const handleReviewSubmit = async (status: RequestStatus | null, note: string) => {
     console.log(`Review result for ${request.id}:`, { status, note });
+    if (status !== null) {
+      await reviewRequest.mutateAsync({ id: request.id, status, note });
+    } else {
+      console.error("Invalid status: status cannot be null.");
+    }
     navigate('/decks');
   };
 
@@ -128,7 +143,7 @@ const { id } = useParams();
                 </CardContent>
                 </Card>
                 
-                {request.status !== 'pending' && (
+                {request.status !== 1 && (
                 <Card className="glass-card border-sidebar-border">
                     <CardHeader>
                     <CardTitle>Review Details</CardTitle>
@@ -187,21 +202,22 @@ const { id } = useParams();
                     </CardContent>
                 </Card>
                 
-                {request.status === 'pending' && (
-                <Card className="glass-card border-sidebar-border">
-                    <CardHeader>
-                    <CardTitle>Review Decision</CardTitle>
-                    <CardDescription>
-                        Approve or reject this public deck request
-                    </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                    <ReviewForm className="space-y-4"
-                        requestId={request.id} 
-                        onReviewSubmit={handleReviewSubmit}
-                    />
-                    </CardContent>
-                </Card>
+                {request.status === 1 && (
+                    <Card className="glass-card border-sidebar-border">
+                        <CardHeader>
+                        <CardTitle>Review Decision</CardTitle>
+                        <CardDescription>
+                            Approve or reject this public deck request
+                        </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                        <ReviewForm
+                            className="space-y-4"  // Now it works
+                            requestId={request.id} 
+                            onReviewSubmit={handleReviewSubmit}
+                        />
+                        </CardContent>
+                    </Card>
                 )}
             </div>
             </div>
