@@ -107,27 +107,27 @@ const Accounts = () => {
           </Button>
         </div>
 
-        <Card>
+        <Card className="border-sidebar-border">
           <CardHeader className="pb-3">
             <CardTitle>All Accounts</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-4">
               <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground border-sidebar-border" />
                 <Input
                   placeholder="Search accounts..."
                   className="pl-8 w-full"
                 />
               </div>
-              <Button variant="outline" size="sm" className="gap-1">
+              <Button variant="outline" size="sm" className="gap-1 border-sidebar-border">
                 <Filter className="h-4 w-4" /> Filter
               </Button>
             </div>
 
             <Table>
-              <TableHeader>
-                <TableRow>
+              <TableHeader >
+                <TableRow className="border-b border-sidebar-border">
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
@@ -136,7 +136,7 @@ const Accounts = () => {
               </TableHeader>
               <TableBody>
                 {accounts.map((account) => (
-                  <TableRow key={account.id} className="hover:bg-muted/50 cursor-pointer">
+                  <TableRow key={account.id} className="hover:bg-muted/50 cursor-pointer border-b border-sidebar-border">
                     <TableCell className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback>
