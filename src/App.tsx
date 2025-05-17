@@ -1,4 +1,3 @@
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -10,6 +9,7 @@ import Accounts from "./pages/Accounts";
 import Decks from "./pages/Decks";
 import ReviewRequest from "./pages/ReviewRequest";
 import AdminLogin from "./pages/AdminLogin";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +36,17 @@ const publicRoutes = [
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Sonner />
+      <Toaster
+        richColors
+        toastOptions={{
+          style: {
+            backgroundColor: "#ffffff",
+            color: "#1f2937", 
+            fontWeight: "bold",
+            boxShadow: "0 4px 12px rgba(31, 41, 55, 0.3)",
+          },
+        }}
+      />
       <BrowserRouter>
         <Routes>
           {/* Public routes */}

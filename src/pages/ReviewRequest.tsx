@@ -29,6 +29,19 @@ const ReviewRequest = () => {
     const startIndex = (currentPage - 1) * cardsPerPage;
     const endIndex = startIndex + cardsPerPage;
 
+    const getStatusBadge = (status: number) => {
+        switch (status) {
+            case 1:
+            return <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/30">Pending</Badge>;
+            case 2:
+            return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Approved</Badge>;
+            case 3:
+            return <Badge className="bg-red-500/20 text-red-700 border-red-500/30">Rejected</Badge>;
+            default:
+            return <Badge className="bg-gray-500/20 text-gray-700 border-gray-500/30">Unknown</Badge>;
+        }
+    };
+
     if (isLoading) {
       return <DashboardLayout><div className="p-4">Loading...</div></DashboardLayout>;
     }
@@ -175,7 +188,7 @@ const ReviewRequest = () => {
                     <CardHeader>
                     <CardTitle>Review Details</CardTitle>
                     <CardDescription>
-                        This request was {request.status} by {request.reviewedBy?.name}
+                        This request was {getStatusBadge(request.status)} by {request.reviewedBy?.name}
                     </CardDescription>
                     </CardHeader>
                     <CardContent>
