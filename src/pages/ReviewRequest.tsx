@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useRequestById, useReviewRequest } from '@/hooks/use-requests';
 import { RequestStatus } from '@/lib/types';
+import { useState } from 'react';
 
 
 const ReviewRequest = () => {
@@ -19,6 +20,14 @@ const ReviewRequest = () => {
     const navigate = useNavigate();
     const { data: request, isLoading, error } = useRequestById(id as string);
     const reviewRequest = useReviewRequest();
+    
+    const [currentPage, setCurrentPage] = useState(1);
+    const cardsPerPage = 4;
+
+    const cards = request?.cards ?? [];
+    const totalPages = Math.ceil(cards.length / cardsPerPage);
+    const startIndex = (currentPage - 1) * cardsPerPage;
+    const endIndex = startIndex + cardsPerPage;
 
     if (isLoading) {
       return <DashboardLayout><div className="p-4">Loading...</div></DashboardLayout>;
@@ -33,6 +42,7 @@ const ReviewRequest = () => {
     } 
   
     console.log("Request data:", request);
+
 
   const handleReviewSubmit = async (status: RequestStatus | null, note: string) => {
     console.log(`Review result for ${request.id}:`, { status, note });
@@ -69,72 +79,95 @@ const ReviewRequest = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
                 <Card className="glass-card border-sidebar-border">
-                <CardHeader>
-                    <CardTitle>Deck Details</CardTitle>
-                    <CardDescription>
-                    Information about the flashcard deck
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
-                    <p className="mt-1">{request.description}</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="flex flex-col">
-                        <span className="text-sm font-medium text-muted-foreground">Cards</span>
-                        <div className="flex items-center mt-1">
-                            <Layers className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
-                            <span>{request.cardsCount} cards</span>
+                    <CardHeader>
+                        <CardTitle>Deck Details</CardTitle>
+                        <CardDescription>
+                        Information about the flashcard deck
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+                            <p className="mt-1">{request.description}</p>
                         </div>
-                    </div>
-                    
-                    <div className="flex flex-col">
-                        <span className="text-sm font-medium text-muted-foreground">Created At</span>
-                        <div className="flex items-center mt-1">
-                        <CalendarIcon className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
-                        <span>{format(new Date(request.createdAt), 'PPP')}</span>
-                        </div>
-                    </div>
-                    
-                    <div className="flex flex-col">
-                        <span className="text-sm font-medium text-muted-foreground">Updated At</span>
-                        <div className="flex items-center mt-1">
-                        <CalendarIcon className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
-                        <span>{format(new Date(request.updatedAt), 'PPP')}</span>
-                        </div>
-                    </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Sample Cards</h3>
-                    {request.cards && request.cards.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {request.cards.slice(0, 4).map((card, index) => (
-                            <div 
-                            key={card._id} 
-                            className="border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors border-sidebar-border"
-                            >
-                            <div className="flex justify-between items-center mb-2">
-                                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs bg-dashboard-purple text-white">
-                                Card {index + 1}
-                                </Badge>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-muted-foreground">Cards</span>
+                                <div className="flex items-center mt-1">
+                                    <Layers className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
+                                    <span>{request.cardsCount} cards</span>
+                                </div>
                             </div>
-                            <p className="text-sm font-medium mb-1">{card.front}</p>
-                            <p className="text-xs text-muted-foreground">{card.back}</p>
+                        
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-muted-foreground">Created At</span>
+                                <div className="flex items-center mt-1">    
+                                <CalendarIcon className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
+                                <span>{format(new Date(request.createdAt), 'PPP')}</span>
+                                </div>
                             </div>
-                        ))}
+                        
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-muted-foreground">Updated At</span>
+                                <div className="flex items-center mt-1">
+                                <CalendarIcon className="h-4 w-4 mr-2 text-primary text-dashboard-blue" />
+                                <span>{format(new Date(request.updatedAt), 'PPP')}</span>
+                                </div>
+                            </div>
                         </div>
-                    ) : (
-                        <p className="text-sm text-muted-foreground italic">No sample cards available.</p>
-                    )}
-                    </div>
+                        
+                        <Separator />
+                        
+                        <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Sample Cards</h3>
+                            {request.cards && request.cards.length > 0 ? (
+                                <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {request.cards.slice(startIndex, endIndex).map((card, index) => (
+                                    <div 
+                                        key={card._id} 
+                                        className="border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors border-sidebar-border"
+                                    >
+                                        <div className="flex justify-between items-center mb-2">
+                                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs bg-dashboard-purple text-white">
+                                            Card {startIndex + index + 1}
+                                        </Badge>
+                                        </div>
+                                        <p className="text-sm font-medium mb-1">{card.front}</p>
+                                        <p className="text-xs text-muted-foreground">{card.back}</p>
+                                    </div>
+                                    ))}
+                                </div>
 
-
-                </CardContent>
+                                {/* Pagination buttons */}
+                                <div className="flex justify-center mt-4 gap-4">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => setCurrentPage((prev) => prev - 1)} 
+                                        disabled={currentPage === 1}
+                                        >
+                                        Previous
+                                    </Button>
+                                    <span className="text-sm text-muted-foreground flex items-center">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => setCurrentPage((prev) => prev + 1)} 
+                                        disabled={currentPage === totalPages}
+                                        >
+                                        Next
+                                    </Button>
+                                </div>
+                                </>
+                            ) : (
+                                <p className="text-sm text-muted-foreground italic">No sample cards available.</p>
+                            )}
+                            </div>
+                    </CardContent>
                 </Card>
                 
                 {request.status !== 1 && (
