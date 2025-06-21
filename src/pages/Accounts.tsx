@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,93 +6,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter } from "lucide-react";
-
-// Mock data
-const accounts = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    status: "active",
-    role: "Admin",
-    joinedDate: "Jan 10, 2025",
-  },
-  {
-    id: "2",
-    name: "Alice Johnson",
-    email: "alice.j@example.com",
-    status: "active",
-    role: "Editor",
-    joinedDate: "Jan 15, 2025",
-  },
-  {
-    id: "3",
-    name: "Robert Brown",
-    email: "robert.b@example.com",
-    status: "inactive",
-    role: "Viewer",
-    joinedDate: "Feb 2, 2025",
-  },
-  {
-    id: "4",
-    name: "Emma Davis",
-    email: "emma.d@example.com",
-    status: "active",
-    role: "Editor",
-    joinedDate: "Feb 12, 2025",
-  },
-  {
-    id: "5",
-    name: "Michael Wilson",
-    email: "michael.w@example.com",
-    status: "active",
-    role: "Viewer",
-    joinedDate: "Feb 18, 2025",
-  },
-  {
-    id: "6",
-    name: "Sophia Martin",
-    email: "sophia.m@example.com",
-    status: "inactive",
-    role: "Editor",
-    joinedDate: "Mar 1, 2025",
-  },
-  {
-    id: "7",
-    name: "James Taylor",
-    email: "james.t@example.com",
-    status: "active",
-    role: "Admin",
-    joinedDate: "Mar 5, 2025",
-  },
-  {
-    id: "8",
-    name: "Olivia White",
-    email: "olivia.w@example.com",
-    status: "active",
-    role: "Viewer",
-    joinedDate: "Mar 10, 2025",
-  },
-  {
-    id: "9",
-    name: "William Harris",
-    email: "william.h@example.com",
-    status: "active",
-    role: "Editor",
-    joinedDate: "Mar 15, 2025",
-  },
-  {
-    id: "10",
-    name: "Ava Clark",
-    email: "ava.c@example.com",
-    status: "active",
-    role: "Viewer",
-    joinedDate: "Mar 20, 2025",
-  },
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter } from "lucide-react";
+import { useListAccounts } from "@/hooks/use-list-account";
+import dayjs from "dayjs";
 
 const Accounts = () => {
+  const { accounts, loading, error } = useListAccounts();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const filteredAccounts = accounts.filter((account) => {
+    const matchesSearch = account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      account.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || 
+      (statusFilter === "pro" && account.isPro) ||
+      (statusFilter === "free" && !account.isPro);
+    
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -102,9 +37,6 @@ const Accounts = () => {
               Manage user accounts and permissions.
             </p>
           </div>
-          <Button className="bg-dashboard-purple hover:bg-dashboard-purple/90">
-            <Plus className="mr-2 h-4 w-4" /> Add Account
-          </Button>
         </div>
 
         <Card className="border-sidebar-border">
@@ -112,59 +44,82 @@ const Accounts = () => {
             <CardTitle>All Accounts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-4">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground border-sidebar-border" />
                 <Input
                   placeholder="Search accounts..."
                   className="pl-8 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="sm" className="gap-1 border-sidebar-border">
-                <Filter className="h-4 w-4" /> Filter
-              </Button>
+              
+              <div className="flex items-center gap-2">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* <Button variant="outline" size="sm" className="gap-1 border-sidebar-border">
+                  <Filter className="h-4 w-4" /> Filter
+                </Button> */}
+              </div>
             </div>
 
-            <Table>
-              <TableHeader >
-                <TableRow className="border-b border-sidebar-border">
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {accounts.map((account) => (
-                  <TableRow key={account.id} className="hover:bg-muted/50 cursor-pointer border-b border-sidebar-border">
-                    <TableCell className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {account.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{account.name}</div>
-                        <div className="text-sm text-muted-foreground">{account.email}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{account.role}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="outline" 
-                        className={account.status === "active" ? 
-                          "border-dashboard-green text-dashboard-green" : 
-                          "border-dashboard-red text-dashboard-red"
-                        }
-                      >
-                        {account.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{account.joinedDate}</TableCell>
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Loading accounts...</p>
+            ) : error ? (
+              <p className="text-sm text-red-500">Error: {error}</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-sidebar-border">
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Joined</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredAccounts.map((account) => (
+                    <TableRow key={account.id} className="hover:bg-muted/50 cursor-pointer border-b border-sidebar-border">
+                      <TableCell className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {account.name.split(" ").map(n => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{account.name}</div>
+                          <div className="text-sm text-muted-foreground">{account.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{account.role || "No role"}</TableCell>
+
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={account.isPro
+                            ? "border-green-500 text-green-500"
+                            : "border-red-500 text-red-500"
+                          }
+                        >
+                          {account.isPro ? "Pro" : "Free"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{dayjs(account.createdAt).format("MMM D, YYYY")}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
