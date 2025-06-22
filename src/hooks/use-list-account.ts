@@ -1,74 +1,45 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query"
+import { api } from "@/lib/api"
 
-
-const API_URL = "http://localhost:3000";
-
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-
-export interface Account {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  isPro?: boolean;
-  avatar?: string;
-  createdAt?: string;
-  proExpiryDate?: string | null;
+export interface UserAccount {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  isPro: boolean
+  proExpiryDate?: string
+  createdAt: string
+  role: "user" | "admin"
 }
 
+export function useAccounts() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
 
-export const useListAccounts = () => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  return useQuery<UserAccount[]>({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      const response = await api.get<any[]>("api/user/listAccounts", {
+        headers: {
+          Authorization: token, 
+        },
+      });
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      const token = localStorage.getItem("token");
+      const data = response.data;
 
-      if (!token) {
-        setError("Unauthorized. Please login.");
-        setLoading(false);
-        return;
-      }
+      return data.map(
+        (item): UserAccount => ({
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          avatar: item.avatar,
+          isPro: item.isPro,
+          proExpiryDate: item.proExpiryDate,
+          createdAt: item.createdAt,
+          role: item.role,
+        })
+      );
+    },
+  });
+}
 
-      try {
-        const response = await api.get<Account[]>("/api/user/listAccounts");
-        setAccounts(response.data);
-      } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            err.message ||
-            "An error occurred while fetching accounts."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
-
-  return { accounts, loading, error };
-};

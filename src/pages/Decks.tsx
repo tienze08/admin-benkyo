@@ -3,14 +3,34 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useRequests } from "@/hooks/use-requests";
 import { cn } from "@/lib/utils";
-import { Plus, Search, Filter, Check, X, Clock, ExternalLink } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Filter,
+  Check,
+  X,
+  Clock,
+  ExternalLink,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
-
+import { useState } from "react";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -20,14 +40,15 @@ const statusOptions = [
 ];
 
 const Decks = () => {
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const { data: decks = [] } = useRequests();
 
   console.log("Decks data:", decks);
-  
-  const pendingCount = decks.filter(deck => deck.status === 1).length;
-  const approvedCount = decks.filter(deck => deck.status === 2).length;
-  const rejectedCount = decks.filter(deck => deck.status === 3).length;
+
+  const pendingCount = decks.filter((deck) => deck.status === 1).length;
+  const approvedCount = decks.filter((deck) => deck.status === 2).length;
+  const rejectedCount = decks.filter((deck) => deck.status === 3).length;
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -37,10 +58,29 @@ const Decks = () => {
       year: "numeric",
     }).format(date);
   };
+  const statusValueMap: Record<string, number | null> = {
+    all: null,
+    pending: 1,
+    approved: 2,
+    rejected: 3,
+  };
+  
+  const filteredDecks = decks.filter((deck) => {
+    const matchesSearch =
+      deck.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deck.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deck.creator.name.toLowerCase().includes(searchTerm.toLowerCase());
+  
+    const statusFilterValue = statusValueMap[statusFilter];
+    const matchesStatus =
+      statusFilterValue === null || deck.status === statusFilterValue;
+  
+    return matchesSearch && matchesStatus;
+  });
   
 
   return (
-    <DashboardLayout >
+    <DashboardLayout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
@@ -49,15 +89,14 @@ const Decks = () => {
               Manage and review presentation decks.
             </p>
           </div>
-          <Button className="bg-dashboard-purple hover:bg-dashboard-purple/90">
-            <Plus className="mr-2 h-4 w-4" /> Create Deck
-          </Button>
         </div>
 
         <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
           <Card className="border-sidebar-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Pending Review
+              </CardTitle>
               <div className="h-8 w-8 rounded-full bg-dashboard-light-orange p-1.5">
                 <Clock className="h-full w-full text-dashboard-orange" />
               </div>
@@ -104,24 +143,28 @@ const Decks = () => {
                 <Input
                   placeholder="Search decks..."
                   className="pl-8 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex gap-2 w-full md:w-auto">
-                <Select defaultValue="all" >
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value) => setStatusFilter(value)}
+                >
                   <SelectTrigger className="w-full md:w-[180px] border border-sidebar-border">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-purple-50 border border-sidebar-border">
-                    {statusOptions.map(option => (
+                    {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" className="border-sidebar-border">
-                  <Filter className="h-4 w-4" />
-                </Button>
+
+              
               </div>
             </div>
 
@@ -137,17 +180,16 @@ const Decks = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-              {decks.map((deck) => {
-                const statusMap = {
-                  1: "pending",
-                  2: "approved",
-                  3: "rejected",
-                };
+                {filteredDecks.map((deck) => {
+                  const statusMap = {
+                    1: "pending",
+                    2: "approved",
+                    3: "rejected",
+                  };
 
-                const statusString = statusMap[deck.status] || "unknown";
-
-                return (
-                  <TableRow key={deck.id} className="hover:bg-muted/50 border-b border-sidebar-border">
+                  const statusString = statusMap[deck.status] || "unknown";
+                  return (
+                    <TableRow key={deck.id} className="hover:bg-muted/50 border-b border-sidebar-border">
                     <TableCell className="font-medium">{deck.title}</TableCell>
                     <TableCell>{deck.creator.name}</TableCell>
                     <TableCell>{deck.description}</TableCell>
@@ -175,8 +217,8 @@ const Decks = () => {
                       </Link>
                     </TableCell>
                   </TableRow>
-                );
-              })}
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
