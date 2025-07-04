@@ -10,63 +10,64 @@ import Decks from "./pages/Decks";
 import ReviewRequest from "./pages/ReviewRequest";
 import AdminLogin from "./pages/AdminLogin";
 import { Toaster } from "sonner";
+import Packages from "./pages/Packages";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = !!localStorage.getItem("token");
+    const isAuthenticated = !!localStorage.getItem("token");
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const protectedRoutes = [
-  { path: "/", element: <Index /> },
-  { path: "/accounts", element: <Accounts /> },
-  { path: "/revenue", element: <Revenue /> },
-  { path: "/decks", element: <Decks /> },
-  { path: "/settings", element: <Settings /> },
-  { path: "/review/:id", element: <ReviewRequest /> },
+    { path: "/", element: <Index /> },
+    { path: "/accounts", element: <Accounts /> },
+    { path: "/revenue", element: <Revenue /> },
+    { path: "/decks", element: <Decks /> },
+    { path: "/settings", element: <Settings /> },
+    { path: "/review/:id", element: <ReviewRequest /> },
+    { path: "/packages", element: <Packages /> },
 ];
 
 const publicRoutes = [
-  { path: "/login", element: <AdminLogin /> },
-  { path: "*", element: <NotFound /> },
+    { path: "/login", element: <AdminLogin /> },
+    { path: "*", element: <NotFound /> },
 ];
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster
-        richColors
-        toastOptions={{
-          style: {
-            backgroundColor: "#ffffff",
-            color: "#1f2937", 
-            fontWeight: "bold",
-            boxShadow: "0 4px 12px rgba(31, 41, 55, 0.3)",
-          },
-        }}
-      />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          {publicRoutes.map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
-
-          {/* Protected routes */}
-          {protectedRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<ProtectedRoute>{element}</ProtectedRoute>}
+    <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+            <Toaster
+                richColors
+                toastOptions={{
+                    style: {
+                        backgroundColor: "#ffffff",
+                        color: "#1f2937",
+                        fontWeight: "bold",
+                        boxShadow: "0 4px 12px rgba(31, 41, 55, 0.3)",
+                    },
+                }}
             />
-          ))}
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            <BrowserRouter>
+                <Routes>
+                    {/* Public routes */}
+                    {publicRoutes.map(({ path, element }) => (
+                        <Route key={path} path={path} element={element} />
+                    ))}
 
+                    {/* Protected routes */}
+                    {protectedRoutes.map(({ path, element }) => (
+                        <Route
+                            key={path}
+                            path={path}
+                            element={<ProtectedRoute>{element}</ProtectedRoute>}
+                        />
+                    ))}
+                </Routes>
+            </BrowserRouter>
+        </TooltipProvider>
+    </QueryClientProvider>
+);
 
 export default App;
