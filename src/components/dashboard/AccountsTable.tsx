@@ -42,7 +42,7 @@ export function AccountsTable({ accounts }: AccountsTableProps) {
                   <span className="font-medium">{account.name}</span>
                 </TableCell>
                 <TableCell>{account.email}</TableCell>  
-                <TableCell>{account.joinedDate}</TableCell>
+                <TableCell>{account.createdAt}</TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -1,160 +1,162 @@
-import { AccountsTable } from "@/components/dashboard/AccountsTable";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { DecksTable } from "@/components/dashboard/DecksTable";
-import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { StatCard } from "@/components/dashboard/StatCard";
-
-import { Users, DollarSign, FileText, Clock} from "lucide-react";
-
-// Mock data for dashboard
-const revenueData = [
-  { name: "Jan", revenue: 12000 },
-  { name: "Feb", revenue: 15000 },
-  { name: "Mar", revenue: 18000 },
-  { name: "Apr", revenue: 22000 },
-  { name: "May", revenue: 19000 },
-  { name: "Jun", revenue: 25000 },
-  { name: "Jul", revenue: 32000 },
-  { name: "Aug", revenue: 38000 },
-  { name: "Sep", revenue: 43000 },
-  { name: "Oct", revenue: 41000 },
-  { name: "Nov", revenue: 45000 },
-  { name: "Dec", revenue: 52000 },
-];
-
-const newAccounts = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    joinedDate: "Today, 2:30 PM",
-  },
-  {
-    id: "2",
-    name: "Alice Johnson",
-    email: "alice.j@example.com",
-    joinedDate: "Today, 10:15 AM",
-  },
-  {
-    id: "3",
-    name: "Robert Brown",
-    email: "robert.b@example.com",
-    joinedDate: "Yesterday, 5:42 PM",
-  },
-  {
-    id: "4",
-    name: "Emma Davis",
-    email: "emma.d@example.com",
-    joinedDate: "Yesterday, 1:20 PM",
-  },
-  {
-    id: "5",
-    name: "Michael Wilson",
-    email: "michael.w@example.com",
-    joinedDate: "2 days ago, 9:30 AM",
-  },
-];
-
-const recentDecks = [
-  {
-    id: "1",
-    title: "Marketing Strategy 2025",
-    author: "John Smith",
-    status: "approved" as const,
-    date: "Today, 4:30 PM",
-  },
-  {
-    id: "2",
-    title: "Q4 Financial Report",
-    author: "Alice Johnson",
-    status: "pending" as const,
-    date: "Today, 2:15 PM",
-  },
-  {
-    id: "3",
-    title: "Product Roadmap",
-    author: "Robert Brown",
-    status: "rejected" as const,
-    date: "Yesterday, 3:42 PM",
-  },
-  {
-    id: "4",
-    title: "Brand Guidelines",
-    author: "Emma Davis",
-    status: "approved" as const,
-    date: "Yesterday, 11:20 AM",
-  },
-  {
-    id: "5",
-    title: "Investor Presentation",
-    author: "Michael Wilson",
-    status: "pending" as const,
-    date: "2 days ago, 10:30 AM",
-  },
-];
+import React from "react"
+import { AccountsTable } from "@/components/dashboard/AccountsTable"
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
+import { DecksTable } from "@/components/dashboard/DecksTable"
+import { RevenueChart } from "@/components/dashboard/RevenueChart"
+import { StatCard } from "@/components/dashboard/StatCard"
+import { isToday, parseISO, format } from "date-fns"
+import { useAccountStats } from "@/hooks/use-get-accountStats"
+import { useDeckStats } from "@/hooks/use-get-deckStats"
+import { useDashboardMetrics } from "@/hooks/use-get-totalRevenue"
+import { useMonthlyRevenue } from "@/hooks/use-get-monthlyRevenue"
+import { useAccounts } from "@/hooks/use-list-account"
+import { useRequests } from "@/hooks/use-requests"
+import { Users, DollarSign, FileText, Clock } from "lucide-react"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useMemo } from "react"
 
 const Index = () => {
-  // Calculate totals
-  const totalRevenue = revenueData.reduce((acc, month) => acc + month.revenue, 0);
-  const totalAccounts = 1250; // Mock value
-  const totalDecks = 3567; // Mock value
-  const pendingDecks = recentDecks.filter(deck => deck.status === "pending").length + 42;
-  
+  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear().toString())
+
+  const availableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    return Array.from({ length: 3 }, (_, index) => currentYear - index)
+  }, [])
+
+  const { data: accountStats, isLoading: loadingAccountStats } = useAccountStats(selectedYear)
+  const { data: deckStats, isLoading: loadingDeckStats } = useDeckStats(selectedYear)
+  const { data: revenueStats, isLoading: loadingRevenue } = useDashboardMetrics(selectedYear)
+  const { data: monthlyRevenue = [], isLoading: loadingMonthlyRevenue } = useMonthlyRevenue(selectedYear)
+  const { data: allAccounts = [], isLoading: loadingAccounts } = useAccounts(selectedYear)
+  const { data: allDeckRequests = [], isLoading: loadingRequests } = useRequests(selectedYear)
+
+  const todayAccounts = allAccounts.filter((acc) => isToday(parseISO(acc.createdAt)))
+
+  function mapStatusToLabel(status: number): "pending" | "approved" | "rejected" {
+    if (status === 1) return "pending"
+    if (status === 2) return "approved"
+    if (status === 3) return "rejected"
+    return "pending"
+  }
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      minimumFractionDigits: 0,
+    }).format(value)
+  }
+
+  const todayDecks = allDeckRequests
+    .filter((deck) => isToday(parseISO(deck.createdAt)))
+    .map((deck) => ({
+      id: deck.id,
+      title: deck.title,
+      author: deck.creator.name,
+      status: mapStatusToLabel(deck.status),
+      date: `Today, ${format(parseISO(deck.createdAt), "p")}`,
+    }))
+
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year)
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">
-            Overview of your accounts, revenue, and decks.
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">Overview of your accounts, revenue, and decks.</p>
+          </div>
+          <Select value={selectedYear} onValueChange={handleYearChange}>
+            <SelectTrigger className="w-[180px] border-sidebar-border">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent className="w-[180px] border-sidebar-border bg-purple-50">
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={year.toString()} className="cursor-pointer">
+                  {year}
+                  {year === new Date().getFullYear() && (
+                    <span className="ml-2 text-xs text-purple-600 font-medium">(Current)</span>
+                  )}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
+        {/* Thống kê */}
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Accounts"
-            value={totalAccounts.toString()}
+            value={loadingAccountStats ? "..." : (accountStats?.totalAccounts?.toString() ?? "0")}
             icon={Users}
-            description="New accounts this month: 125"
-            trend={{ value: 12, isPositive: true }}
+            description={
+              loadingAccountStats
+                ? "Loading..."
+                : `New accounts this month (${selectedYear}): ${accountStats?.newAccountsThisMonth ?? 0}`
+            }
+            trend={{
+              value: accountStats?.growthPercentage ?? 0,
+              isPositive: (accountStats?.growthPercentage ?? 0) >= 0,
+            }}
             iconClassName="bg-dashboard-light-blue text-dashboard-blue"
           />
           <StatCard
             title="Total Revenue"
-            value={`$${totalRevenue.toLocaleString()}`}
+            value={loadingRevenue ? "..." : formatCurrency(revenueStats?.totalRevenue ?? 0)}
             icon={DollarSign}
-            description="Monthly target: $350,000"
-            trend={{ value: 8, isPositive: true }}
+           
+           
             iconClassName="bg-dashboard-light-purple text-dashboard-purple"
           />
           <StatCard
             title="Total Decks"
-            value={totalDecks.toString()}
+            value={loadingDeckStats ? "..." : (deckStats?.totalDecks?.toString() ?? "0")}
             icon={FileText}
-            description="Created this month: 287"
-            trend={{ value: 5, isPositive: true }}
+            description={
+              loadingDeckStats
+                ? "Loading..."
+                : `Created this month (${selectedYear}): ${deckStats?.createdThisMonth ?? 0}`
+            }
+            trend={{
+              value: deckStats?.growthPercentage ?? 0,
+              isPositive: (deckStats?.growthPercentage ?? 0) >= 0,
+            }}
             iconClassName="bg-dashboard-light-green text-dashboard-green"
           />
           <StatCard
             title="Pending Approvals"
-            value={pendingDecks.toString()}
+            value={loadingDeckStats ? "..." : (deckStats?.pendingDecks?.toString() ?? "0")}
             icon={Clock}
-            description="Awaiting review"
+            description={`Awaiting review (${selectedYear})`}
             iconClassName="bg-dashboard-light-orange text-dashboard-orange"
           />
         </div>
-
+        {/* Biểu đồ doanh thu */}
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-4">
-          <RevenueChart data={revenueData} />
+          {loadingMonthlyRevenue ? (
+            <Card className="col-span-4 border-sidebar-border">
+              <CardHeader>
+                <CardTitle>Monthly Revenue ({selectedYear})</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px] flex items-center justify-center">
+                <span className="text-muted-foreground">Loading chart...</span>
+              </CardContent>
+            </Card>
+          ) : (
+            <RevenueChart data={monthlyRevenue} year={selectedYear} />
+          )}
         </div>
-
+        {/* Bảng tài khoản & deck */}
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-          <AccountsTable accounts={newAccounts} />
-          <DecksTable decks={recentDecks} />
+          <AccountsTable accounts={todayAccounts} isLoading={loadingAccounts} />
+          <DecksTable decks={todayDecks} isLoading={loadingRequests} />
         </div>
       </div>
     </DashboardLayout>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

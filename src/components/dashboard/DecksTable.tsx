@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Check, X, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Deck {
   id: string;
@@ -17,6 +18,8 @@ interface DecksTableProps {
 }
 
 export function DecksTable({ decks }: DecksTableProps) {
+  const navigate = useNavigate();
+
   return (
     <Card className="border-sidebar-border">
       <CardHeader>
@@ -34,7 +37,11 @@ export function DecksTable({ decks }: DecksTableProps) {
           </TableHeader>
           <TableBody>
             {decks.map((deck) => (
-              <TableRow key={deck.id} className="border-b border-sidebar-border hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))] transition-colors">
+              <TableRow
+                key={deck.id}
+                onClick={() => navigate(`/review/${deck.id}`)}
+                className="border-b border-sidebar-border hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))] transition-colors cursor-pointer"
+              >
                 <TableCell className="font-medium pt-3 pb-3">{deck.title}</TableCell>
                 <TableCell>{deck.author}</TableCell>
                 <TableCell>
