@@ -20,23 +20,23 @@ import { useEffect, useState } from "react";
 const AccountsPage = () => {
     const { data: accounts, isLoading } = useAccounts();
     const [searchTerm, setSearchTerm] = useState("");
+const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         console.log("Token:", token);
     }, []);
-    useEffect(() => {
-        if (accounts) {
-            console.log("✅ List of accounts:");
-            accounts.forEach((acc, index) => {
-                console.log(
-                    `${index + 1}. ${acc.name} (${acc.email}) - Role: ${
-                        acc.role
-                    }`
-                );
-            });
-        }
-    }, [accounts]);
+ useEffect(() => {
+  if (accounts) {
+    console.log("✅ List of accounts:");
+    accounts.forEach((acc, index) => {
+      console.log(
+        `${index + 1}. ${acc.name} (${acc.email}) - Role: ${acc.role} - isPro: ${acc.isPro} - proType: ${acc.proType}`
+      );
+    });
+  }
+}, [accounts]);
+
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -50,20 +50,30 @@ const AccountsPage = () => {
         if (!proExpiryDate) return false;
         return new Date(proExpiryDate) < new Date();
     };
-    const [filterPro, setFilterPro] = useState<"all" | "free" | "pro">("all");
-    const filteredAccounts =
-        accounts?.filter((account) => {
-            const matchesSearch =
-                account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                account.email.toLowerCase().includes(searchTerm.toLowerCase());
+   const [filterPro, setFilterPro] = useState<"all" | "free" | "pro" | "premium">("all");
 
-            const matchesProFilter =
-                filterPro === "all" ||
-                (filterPro === "pro" && account.isPro) ||
-                (filterPro === "free" && !account.isPro);
+const filteredAccounts =
+  accounts
+    ?.filter((account) => {
+      const matchesSearch =
+        account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        account.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-            return matchesSearch && matchesProFilter;
-        }) || [];
+     const matchesProFilter =
+  filterPro === "all" ||
+  (filterPro === "free" && (!account.isPro || account.proType?.toLowerCase() === "basic")) ||
+  (filterPro === "pro" && account.isPro && account.proType?.toLowerCase() === "pro") ||
+  (filterPro === "premium" && account.isPro && account.proType?.toLowerCase() === "premium");
+
+
+      return matchesSearch && matchesProFilter;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortBy === "newest" ? dateB - dateA : dateA - dateB;
+    }) || [];
+
 
     return (
         <DashboardLayout>
@@ -98,31 +108,50 @@ const AccountsPage = () => {
                                     }
                                 />
                             </div>
-                            <div className="flex gap-2 items-center">
+                            <div className="flex flex-col md:flex-row gap-2 items-center">
+
                                 <label
                                     htmlFor="pro-filter"
                                     className="text-sm font-medium text-gray-700"
                                 >
                                     Filter by:
                                 </label>
-                                <select
-                                    id="pro-filter"
-                                    value={filterPro}
-                                    onChange={(e) =>
-                                        setFilterPro(
-                                            e.target.value as
-                                                | "all"
-                                                | "pro"
-                                                | "free"
-                                        )
-                                    }
-                                    className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-                                >
-                                    <option value="all">All</option>
-                                    <option value="pro">Pro</option>
-                                    <option value="free">Free</option>
-                                </select>
-                            </div>
+                               <select
+  id="pro-filter"
+  value={filterPro}
+  onChange={(e) =>
+    setFilterPro(
+      e.target.value as "all" | "pro" | "premium" | "free"
+    )
+  }
+  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+>
+  <option value="all">All</option>
+  <option value="pro">Pro</option>
+  <option value="premium">Premium</option>
+  <option value="free">Free</option>
+</select>
+
+                          
+                          
+                                
+  <label htmlFor="sort-by" className="text-sm font-medium text-gray-700">
+    Sort by:
+  </label>
+  <select
+    id="sort-by"
+    value={sortBy}
+    onChange={(e) => setSortBy(e.target.value as "newest" | "oldest")}
+    className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+  >
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
+  </select>
+
+
+</div>
+                            
+
                         </div>
 
                         {isLoading ? (
@@ -153,6 +182,7 @@ const AccountsPage = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {filteredAccounts.map((account) => (
+                                         
                                         <TableRow
                                             key={account.id}
                                             className="hover:bg-muted/50 cursor-pointer border-b border-sidebar-border"
@@ -200,38 +230,35 @@ const AccountsPage = () => {
                                                 </Badge>
                                             </TableCell>
 
-                                            <TableCell>
-                                                {account.isPro ? (
-                                                    <div className="flex items-center gap-1">
-                                                        <Crown className="h-4 w-4 text-yellow-500" />
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={
-                                                                account.proExpiryDate &&
-                                                                isProExpired(
-                                                                    account.proExpiryDate
-                                                                )
-                                                                    ? "border-dashboard-red text-dashboard-red"
-                                                                    : "border-yellow-500 text-yellow-600"
-                                                            }
-                                                        >
-                                                            {account.proExpiryDate &&
-                                                            isProExpired(
-                                                                account.proExpiryDate
-                                                            )
-                                                                ? "Expired"
-                                                                : "Pro"}
-                                                        </Badge>
-                                                    </div>
-                                                ) : (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="border-gray-300 text-gray-600"
-                                                    >
-                                                        Free
-                                                    </Badge>
-                                                )}
-                                            </TableCell>
+<TableCell>
+  {account.isPro && account.proType?.toLowerCase() !== 'basic' ? (
+    <div className="flex items-center gap-1">
+      <Crown
+        className={
+          account.proType?.toLowerCase() === "premium"
+            ? "h-4 w-4 text-purple-600"
+            : "h-4 w-4 text-yellow-500"
+        }
+      />
+      <Badge
+        variant="outline"
+        className={
+          account.proType?.toLowerCase() === "premium"
+            ? "border-purple-500 text-purple-600"
+            : "border-yellow-500 text-yellow-600"
+        }
+      >
+        {account.proType?.charAt(0).toUpperCase() + account.proType?.slice(1) || "Pro"}
+      </Badge>
+    </div>
+  ) : (
+    <Badge variant="outline" className="border-gray-300 text-gray-600">
+      Free
+    </Badge>
+  )}
+</TableCell>
+
+
                                             <TableCell>
                                                 {formatDate(account.createdAt)}
                                             </TableCell>
@@ -255,6 +282,6 @@ const AccountsPage = () => {
             </div>
         </DashboardLayout>
     );
-};
+}
 
 export default AccountsPage;

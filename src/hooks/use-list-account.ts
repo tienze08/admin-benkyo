@@ -9,6 +9,7 @@ export interface UserAccount {
   isPro: boolean
   proExpiryDate?: string
   createdAt: string
+  proType?: string
   role: "user" | "admin"
 }
 
@@ -36,6 +37,7 @@ export function useAccounts() {
           isPro: item.isPro,
           proExpiryDate: item.proExpiryDate,
           createdAt: item.createdAt,
+           proType: item.proType,
           role: item.role,
         })
       );

@@ -1,18 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 
 interface RevenueChartProps {
   data: {
     name: string;
     revenue: number;
   }[];
+  year: string;
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+export function RevenueChart({ data, year }: RevenueChartProps) {
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
       minimumFractionDigits: 0,
     }).format(value);
   };
@@ -20,7 +29,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="col-span-4 border-sidebar-border">
       <CardHeader>
-        <CardTitle>Monthly Revenue</CardTitle>
+        <CardTitle>Monthly Revenue ({year})</CardTitle>
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -36,7 +45,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="name" stroke="#888888" tick={{ fontSize: 12 }} />
             <YAxis
-              tickFormatter={formatCurrency}
+              tickFormatter={(value: number) => formatCurrency(value)}
               stroke="#888888"
               tick={{ fontSize: 12 }}
               tickLine={false}
@@ -49,7 +58,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 }
                 return value;
               }}
-              labelFormatter={(label) => `Month: ${label}`}
+              labelFormatter={(label) => `Tháng: ${label}`}
             />
             <Area
               type="monotone"
