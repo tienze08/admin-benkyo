@@ -43,6 +43,8 @@ const Revenue = () => {
     const { data: monthlyRevenue = [] } = useMonthlyRevenue(selectedYear) as {
         data: { name: string; revenue: number }[] | undefined;
     };
+
+    console.log("Monthly Revenue Data:", monthlyRevenue);
     const {
         data: quarterlyRevenue = [],
         isLoading: isLoadingQuarterly,
