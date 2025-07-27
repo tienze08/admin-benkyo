@@ -8,8 +8,8 @@ export interface MonthlyRevenue {
 }
 
 export function useMonthlyRevenue(year: string) {
-  return useQuery<MonthlyRevenue[]>({
-    queryKey: ["monthly-revenue", year],
+  return useQuery({
+    queryKey: [],
     queryFn: async () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");

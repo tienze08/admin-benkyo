@@ -5,7 +5,7 @@ export function usePackages() {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
 
-  return useQuery<Package[]>({
+  return useQuery({
     queryKey: ["packages"],
     queryFn: async () => {
       const response = await api.get<any[]>("api/package", {
@@ -17,7 +17,7 @@ export function usePackages() {
       const data = response.data;
 
       return data.map(
-        (item): Package => ({
+        (item): any => ({
           id: item.id,
           name: item.name,
           type: item.type,
