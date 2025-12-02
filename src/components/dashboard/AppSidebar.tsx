@@ -8,6 +8,7 @@ import {
     ChevronRight,
     LogOut,
     Package,
+    Bell,
 } from "lucide-react";
 
 import {
@@ -31,6 +32,11 @@ import { useEffect, useState } from "react";
 import { logout } from "@/hooks/auth";
 
 const navigationItems = [
+    {
+        title: "Notification",
+        url: "/notification",
+        icon: Bell,
+    },
     {
         title: "Dashboard",
         url: "/",
