@@ -9,6 +9,7 @@ import Accounts from "./pages/Accounts";
 import Decks from "./pages/Decks";
 import ReviewRequest from "./pages/ReviewRequest";
 import AdminLogin from "./pages/AdminLogin";
+import Notification from "./pages/Notification";
 import { Toaster } from "sonner";
 import Packages from "./pages/Packages";
 
@@ -28,6 +29,7 @@ const protectedRoutes = [
     { path: "/settings", element: <Settings /> },
     { path: "/review/:id", element: <ReviewRequest /> },
     { path: "/packages", element: <Packages /> },
+    { path: "/notification", element: <Notification /> },
 ];
 
 const publicRoutes = [
