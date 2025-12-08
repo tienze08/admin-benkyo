@@ -13,6 +13,8 @@ const Notifications = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -29,11 +31,21 @@ const Notifications = () => {
     );
   }
 
-  // Phân trang
-  const totalPages = Math.ceil(notifications.length / itemsPerPage);
+  // 🔍 FILTER THEO SEARCH
+  const filteredNotifications = notifications.filter((n) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      n.message.toLowerCase().includes(term) ||
+      n.deckTitle.toLowerCase().includes(term) ||
+      n.actorName.toLowerCase().includes(term)
+    );
+  });
+
+  // PHÂN TRANG SAU KHI FILTER
+  const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentNotifications = notifications.slice(startIndex, endIndex);
+  const currentNotifications = filteredNotifications.slice(startIndex, endIndex);
 
   const handleClick = (deckId: string) => {
     navigate(`/review/${deckId}`);
@@ -43,9 +55,24 @@ const Notifications = () => {
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Notifications</h1>
-        <p className="text-gray-600">
-          You have {notifications.length} notifications
-        </p>
+
+        <div className="flex flex-col gap-2">
+          <p className="text-gray-600">
+            Total: {notifications.length} notifications
+          </p>
+
+          {/* 🔍 THANH SEARCH */}
+          <input
+            type="text"
+            placeholder="Search notifications..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset về trang 1 khi search
+            }}
+            className="border rounded-lg p-2 w-full max-w-md focus:ring-purple-500 focus:border-purple-500"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-6 w-full max-w-5xl">

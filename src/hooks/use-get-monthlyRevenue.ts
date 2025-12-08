@@ -9,7 +9,7 @@ export interface MonthlyRevenue {
 
 export function useMonthlyRevenue(year: string) {
   return useQuery({
-    queryKey: [],
+    queryKey: ["monthlyRevenue", year],   
     queryFn: async () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
@@ -19,6 +19,7 @@ export function useMonthlyRevenue(year: string) {
       });
       return res.data;
     },
-    enabled: !!year, 
+    enabled: !!year,
   });
 }
+

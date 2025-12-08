@@ -1,13 +1,71 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { useChangePassword } from "@/hooks/use-change-password";
+import { toast } from "sonner";
 
 const Settings = () => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const changePasswordMutation = useChangePassword();
+
+  const validateFields = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields.");
+      return false;
+    }
+
+    if (newPassword === currentPassword) {
+      toast.error("New password cannot be the same as the old password!");
+      return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New password and confirmation do not match.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleChangePassword = () => {
+    if (!validateFields()) return;
+
+    changePasswordMutation.mutate(
+  { 
+    oldPassword: currentPassword, 
+    newPassword,
+    confirmPassword 
+  },
+      {
+        onSuccess: () => {
+          toast.success("Your password has been changed successfully.");
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.message || "Could not update password."
+          );
+        },
+      }
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -18,62 +76,13 @@ const Settings = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-3 border-sidebar-border bg-purple-50  text-sidebar-accent-foreground">
+        <Tabs defaultValue="account" className="w-full">
+          <TabsList className="grid w-full md:w-[400px] grid-cols-2 border-sidebar-border bg-purple-50">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
-          <TabsContent value="profile" className="mt-4">
-            <Card className="border-sidebar-border">
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your personal information and profile settings.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input className="border border-sidebar-border" id="firstName" placeholder="John" defaultValue="Admin" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input className="border border-sidebar-border" id="lastName" placeholder="Doe" defaultValue="User" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input className="border border-sidebar-border" id="email" type="email" placeholder="john.doe@example.com" defaultValue="admin@deckflow.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
-                  <Input className="border border-sidebar-border" id="jobTitle" placeholder="Product Manager" defaultValue="Administrator" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select defaultValue="management">
-                    <SelectTrigger className="bg-purple-50 border border-sidebar-border" id="department">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-purple-50 border border-sidebar-border focus:ring-1 focus:ring-sidebar-border">
-                      <SelectItem value="engineering">Engineering</SelectItem>
-                      <SelectItem value="product">Product</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="support">Support</SelectItem>
-                      <SelectItem value="management">Management</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-              <CardFooter className="border-t border-sidebar-border px-6 py-4">
-                <Button className="bg-dashboard-purple hover:bg-dashboard-purple/90">Save changes</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
+
+          {/* ACCOUNT SETTINGS */}
           <TabsContent value="account" className="mt-4">
             <Card className="border-sidebar-border">
               <CardHeader>
@@ -82,86 +91,59 @@ const Settings = () => {
                   Manage your account, password and security settings.
                 </CardDescription>
               </CardHeader>
+
               <CardContent className="space-y-4">
+                {/* CURRENT PASSWORD */}
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current password</Label>
-                  <Input className="border border-sidebar-border" id="currentPassword" type="password" />
+                  <Label>Current password</Label>
+                  <Input
+                    type="password"
+                    className="border border-sidebar-border"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
                 </div>
+
+                {/* NEW + CONFIRM PASSWORD */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">New password</Label>
-                    <Input className="border border-sidebar-border" id="newPassword" type="password" />
+                    <Label>New password</Label>
+                    <Input
+                      type="password"
+                      className="border border-sidebar-border"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm password</Label>
-                    <Input className="border border-sidebar-border" id="confirmPassword" type="password" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="twoFactor">Two-factor authentication</Label>
-                  <div className="flex items-center space-x-2">
-                    <Switch id="twoFactor" />
-                    <Label htmlFor="twoFactor">Enable two-factor authentication</Label>
+                    <Label>Confirm password</Label>
+                    <Input
+                      type="password"
+                      className="border border-sidebar-border"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
                   </div>
                 </div>
               </CardContent>
+
               <CardFooter className="border-t border-sidebar-border px-6 py-4">
-                <Button className="bg-dashboard-purple hover:bg-dashboard-purple/90">Update password</Button>
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={changePasswordMutation.isPending}
+                  className="bg-dashboard-purple hover:bg-dashboard-purple/90"
+                >
+                  {changePasswordMutation.isPending
+                    ? "Updating..."
+                    : "Update password"}
+                </Button>
               </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="notifications" className="mt-4">
-            <Card className="border-sidebar-border">
-              <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Configure how and when you receive notifications.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">New Account Notifications</p>
-                      <p className="text-sm text-muted-foreground">Receive notifications when new accounts are created</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Revenue Updates</p>
-                      <p className="text-sm text-muted-foreground">Receive weekly revenue summary reports</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Deck Approval Requests</p>
-                      <p className="text-sm text-muted-foreground">Notifications for new deck approval requests</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">System Updates</p>
-                      <p className="text-sm text-muted-foreground">Notifications about system changes and updates</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Marketing Communications</p>
-                      <p className="text-sm text-muted-foreground">Receive marketing emails and product updates</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4 border-sidebar-border">
-                <Button className="bg-dashboard-purple hover:bg-dashboard-purple/90">Save preferences</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
+
+          {/* PROFILE TAB (future content) */}
+          <TabsContent value="profile" className="mt-4" />
         </Tabs>
       </div>
     </DashboardLayout>
