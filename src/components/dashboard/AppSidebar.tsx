@@ -53,6 +53,11 @@ const navigationItems = [
         icon: DollarSign,
     },
     {
+        title: "Withdrawals",
+        url: "/withdrawals",
+        icon: DollarSign,
+    },
+    {
         title: "Decks",
         url: "/decks",
         icon: FileText,

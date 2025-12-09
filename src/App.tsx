@@ -12,6 +12,7 @@ import AdminLogin from "./pages/AdminLogin";
 import Notification from "./pages/Notification";
 import { Toaster } from "sonner";
 import Packages from "./pages/Packages";
+import Withdrawals from "./pages/Withdrawals";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const protectedRoutes = [
     { path: "/review/:id", element: <ReviewRequest /> },
     { path: "/packages", element: <Packages /> },
     { path: "/notification", element: <Notification /> },
+    { path: "/withdrawals", element: <Withdrawals /> },
 ];
 
 const publicRoutes = [
