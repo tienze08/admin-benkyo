@@ -17,6 +17,7 @@ export interface Payout {
   paymentRef?: string;
   proofUrl?: string;
   processedAt?: string;
+  notes?: string;
 }
 
 export interface PendingPayout {
