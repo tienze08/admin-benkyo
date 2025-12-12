@@ -35,12 +35,15 @@ export function usePendingPayout() {
   return useQuery<PendingPayout[]>({
     queryKey: ["pendingPayout"],
     queryFn: async () => {
-      const response = await api.get<PendingPayout[]>("api/payment/payout/latest", {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response = await api.get<PendingPayout[]>(
+        "api/payment/payout/latest",
+        {
+          headers: { Authorization: token },
+        }
+      );
       return response.data;
     },
+    staleTime: 0,
+    refetchInterval: 5000, 
   });
 }

@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
   Card,
@@ -17,36 +16,59 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Wallet, CheckCircle, XCircle } from "lucide-react";
+import { Wallet, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { usePendingPayout } from "@/hooks/use-get-pending-payout";
 import { usePayoutHistory } from "@/hooks/use-get-payout-history";
+import { useRejectPayout } from "@/hooks/use-reject-payout";
 import { useState } from "react";
 
 export default function WithdrawalsUI() {
   const { data: pendingRequests = [], isLoading: loadingPending } = usePendingPayout();
   const { data: processedRequests = [], isLoading: loadingHistory } = usePayoutHistory();
-const [isModalOpen, setIsModalOpen] = useState(false);
-const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-const [rejectReason, setRejectReason] = useState("");
 
-  const updateRequestStatus = (
+  const rejectPayout = useRejectPayout();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  const handleReject = (id: string) => {
+    console.log("Open reject modal for:", id);
+    setSelectedRequestId(id);
+    setRejectReason("");
+    setIsModalOpen(true);
+  };
+
+  const updateRequestStatus = async (
     id: string,
     newStatus: "approved" | "rejected",
     notes: string
   ) => {
-    console.log(`Update ${id} to ${newStatus} with notes: ${notes}`);
+    console.log("Reject payout request:", { id, newStatus, notes });
+
+    rejectPayout.mutate(
+      {
+        transactionId: id,
+        reason: notes,
+      },
+      {
+        onSuccess: (res) => {
+          console.log("Reject success:", res);
+        },
+        onError: (err: any) => {
+          console.error("Reject failed:", err?.response || err);
+        },
+      }
+    );
   };
 
-
-const handleReject = (id: string) => {
-  setSelectedRequestId(id);
-  setRejectReason("");
-  setIsModalOpen(true);
-};
-
   if (loadingPending || loadingHistory) {
-    return <DashboardLayout><div>Loading...</div></DashboardLayout>;
+    return (
+      <DashboardLayout>
+        <div>Loading...</div>
+      </DashboardLayout>
+    );
   }
 
   return (
@@ -97,24 +119,28 @@ const handleReject = (id: string) => {
                       className="hover:bg-blue-50/60 transition border-b border-sidebar-border"
                     >
                       <TableCell>
-                         {req.createdAt ? format(new Date(req.createdAt), "MMM d, yyyy HH:mm") : "-"}
+                        {req.createdAt
+                          ? format(new Date(req.createdAt), "MMM d, yyyy HH:mm")
+                          : "-"}
                       </TableCell>
 
-                      <TableCell className="font-bold">${req.amount.toFixed(2)}</TableCell>
+                      <TableCell className="font-bold">
+                        ${req.amount.toFixed(2)}
+                      </TableCell>
 
-                     <TableCell>
-  <div className="font-medium">{req.user.name}</div>
-  <div className="text-xs text-muted-foreground">
-    {req.payout.accountName} ({req.payout.accountNumber})
-  </div>
-</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{req.user.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {req.payout.accountName} ({req.payout.accountNumber})
+                        </div>
+                      </TableCell>
 
-
-                      <TableCell className="max-w-[220px] truncate">{req.payout?.notes || "-"}</TableCell>
+                      <TableCell className="max-w-[220px] truncate">
+                        {req.note || "-"}
+                      </TableCell>
 
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-
                           <Button
                             size="sm"
                             variant="outline"
@@ -149,7 +175,7 @@ const handleReject = (id: string) => {
                 <TableRow className="border-b border-sidebar-border">
                   <TableHead>Date</TableHead>
                   <TableHead>Amount</TableHead>
-                   <TableHead>Account</TableHead>
+                  <TableHead>Account</TableHead>
                   <TableHead>Bank</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[300px]">Admin Notes</TableHead>
@@ -163,14 +189,18 @@ const handleReject = (id: string) => {
                     className="hover:bg-blue-50/40 transition border-b border-sidebar-border"
                   >
                     <TableCell>
-                      {req.createdAt ? format(new Date(req.createdAt), "MMM d, yyyy HH:mm") : "-"}
+                      {req.createdAt
+                        ? format(new Date(req.createdAt), "MMM d, yyyy HH:mm")
+                        : "-"}
                     </TableCell>
 
-                    <TableCell className="font-medium">${req.amount.toFixed(2)}</TableCell>
- <TableCell>
-  <div className="font-medium">{req.user.name}</div>
-  
-</TableCell>
+                    <TableCell className="font-medium">
+                      ${req.amount.toFixed(2)}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="font-medium">{req.user.name}</div>
+                    </TableCell>
 
                     <TableCell>
                       {req.payout.accountName} ({req.payout.accountNumber})
@@ -178,10 +208,14 @@ const handleReject = (id: string) => {
 
                     <TableCell>
                       {req.status === "SUCCESS" && (
-                        <Badge className="bg-blue-600 text-white">Approved</Badge>
+                        <Badge className="bg-blue-600 text-white">
+                          Approved
+                        </Badge>
                       )}
                       {req.status === "REJECTED" && (
-                        <Badge className="bg-red-500 text-white">Rejected</Badge>
+                        <Badge className="bg-red-500 text-white">
+                          Rejected
+                        </Badge>
                       )}
                     </TableCell>
 
@@ -195,41 +229,40 @@ const handleReject = (id: string) => {
           </CardContent>
         </Card>
       </div>
-      {isModalOpen && (
-  <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded shadow-md w-[400px]">
-      <h2 className="text-lg font-bold mb-4">Reason for Rejection</h2>
-      <textarea
-        className="w-full border p-2 rounded mb-4"
-        rows={4}
-        value={rejectReason}
-        onChange={(e) => setRejectReason(e.target.value)}
-      />
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={() => setIsModalOpen(false)}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={() => {
-            if (!rejectReason) return alert("Reason is required!");
-            if (selectedRequestId) {
-              updateRequestStatus(selectedRequestId, "rejected", rejectReason);
-            }
-            setIsModalOpen(false);
-          }}
-        >
-          Submit
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
 
+      {/* Reject Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-md w-[400px]">
+            <h2 className="text-lg font-bold mb-4">Reason for Rejection</h2>
+
+            <textarea
+              className="w-full border p-2 rounded mb-4"
+              rows={4}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+
+              <Button
+                onClick={() => {
+                  if (!rejectReason) return alert("Reason is required!");
+                  if (selectedRequestId) {
+                    updateRequestStatus(selectedRequestId, "rejected", rejectReason);
+                  }
+                  setIsModalOpen(false);
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
-    
   );
 }
-
