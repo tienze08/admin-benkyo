@@ -35,12 +35,15 @@ export function usePayoutHistory() {
   return useQuery<PayoutHistory[]>({
     queryKey: ["payoutHistory"],
     queryFn: async () => {
-      const response = await api.get<PayoutHistory[]>("api/payment/payout/history", {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response = await api.get<PayoutHistory[]>(
+        "api/payment/payout/history",
+        {
+          headers: { Authorization: token },
+        }
+      );
       return response.data;
     },
+    staleTime: 0,
+    refetchInterval: 5000, 
   });
 }
