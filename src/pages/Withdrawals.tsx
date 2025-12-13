@@ -20,7 +20,6 @@ import { Wallet, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { usePendingPayout } from "@/hooks/use-get-pending-payout";
 import { usePayoutHistory } from "@/hooks/use-get-payout-history";
-import { useRejectPayout } from "@/hooks/use-reject-payout";
 import { useState } from "react";
 
 export default function WithdrawalsUI() {
