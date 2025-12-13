@@ -41,6 +41,8 @@ const Decks = () => {
 
     const { data: decks = [] } = useRequests();
 
+    console.log(decks);
+
     const pendingCount = decks.filter((deck) => deck.status === 1).length;
     const approvedCount = decks.filter((deck) => deck.status === 2).length;
     const rejectedCount = decks.filter((deck) => deck.status === 3).length;
@@ -85,7 +87,10 @@ const Decks = () => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedDecks = filteredDecks.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedDecks = filteredDecks.slice(
+        startIndex,
+        startIndex + itemsPerPage
+    );
 
     return (
         <DashboardLayout>
@@ -93,8 +98,12 @@ const Decks = () => {
                 {/* HEADER */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Decks</h2>
-                        <p className="text-muted-foreground">Manage and review presentation decks.</p>
+                        <h2 className="text-3xl font-bold tracking-tight">
+                            Decks
+                        </h2>
+                        <p className="text-muted-foreground">
+                            Manage and review presentation decks.
+                        </p>
                     </div>
                 </div>
 
@@ -102,40 +111,58 @@ const Decks = () => {
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
                     <Card className="border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                            <CardTitle className="text-sm font-medium">
+                                Pending Review
+                            </CardTitle>
                             <div className="h-8 w-8 rounded-full bg-dashboard-light-orange p-1.5">
                                 <Clock className="h-full w-full text-dashboard-orange" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{pendingCount}</div>
-                            <p className="text-xs text-muted-foreground">Awaiting approval</p>
+                            <div className="text-2xl font-bold">
+                                {pendingCount}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Awaiting approval
+                            </p>
                         </CardContent>
                     </Card>
 
                     <Card className="border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                            <CardTitle className="text-sm font-medium">
+                                Approved
+                            </CardTitle>
                             <div className="h-8 w-8 rounded-full bg-dashboard-light-green p-1.5">
                                 <Check className="h-full w-full text-dashboard-green" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{approvedCount}</div>
-                            <p className="text-xs text-muted-foreground">Ready for use</p>
+                            <div className="text-2xl font-bold">
+                                {approvedCount}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Ready for use
+                            </p>
                         </CardContent>
                     </Card>
 
                     <Card className="border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                            <CardTitle className="text-sm font-medium">
+                                Rejected
+                            </CardTitle>
                             <div className="h-8 w-8 rounded-full bg-dashboard-light-red p-1.5">
                                 <X className="h-full w-full text-dashboard-red" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{rejectedCount}</div>
-                            <p className="text-xs text-muted-foreground">Needs revision</p>
+                            <div className="text-2xl font-bold">
+                                {rejectedCount}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Needs revision
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -155,18 +182,26 @@ const Decks = () => {
                                     placeholder="Search decks..."
                                     className="pl-8 w-full"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
                                 />
                             </div>
 
                             <div className="flex gap-2 w-full md:w-auto">
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <Select
+                                    value={statusFilter}
+                                    onValueChange={setStatusFilter}
+                                >
                                     <SelectTrigger className="w-full md:w-[180px] border border-sidebar-border">
                                         <SelectValue placeholder="Status" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-purple-50 border border-sidebar-border">
                                         {statusOptions.map((option) => (
-                                            <SelectItem key={option.value} value={option.value}>
+                                            <SelectItem
+                                                key={option.value}
+                                                value={option.value}
+                                            >
                                                 {option.label}
                                             </SelectItem>
                                         ))}
@@ -184,7 +219,9 @@ const Decks = () => {
                                     <TableHead>Category</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
 
@@ -196,42 +233,70 @@ const Decks = () => {
                                         3: "rejected",
                                     };
 
-                                    const statusString = statusMap[deck.status] || "unknown";
+                                    const statusString =
+                                        statusMap[deck.status] || "unknown";
 
                                     return (
                                         <TableRow
                                             key={deck.id}
                                             className="hover:bg-muted/50 border-b border-sidebar-border"
                                         >
-                                            <TableCell className="font-medium">{deck.title}</TableCell>
-                                            <TableCell>{deck.creator.name}</TableCell>
-                                            <TableCell>{deck.description}</TableCell>
+                                            <TableCell className="font-medium">
+                                                {deck.title}
+                                            </TableCell>
+                                            <TableCell>
+                                                {deck.creator.name}
+                                            </TableCell>
+                                            <TableCell>
+                                                {deck.description}
+                                            </TableCell>
 
                                             <TableCell>
                                                 <Badge
                                                     className={cn(
                                                         "flex w-fit items-center gap-1",
-                                                        statusString === "approved" &&
+                                                        statusString ===
+                                                            "approved" &&
                                                             "bg-dashboard-light-green text-dashboard-green",
-                                                        statusString === "rejected" &&
+                                                        statusString ===
+                                                            "rejected" &&
                                                             "bg-dashboard-light-red text-dashboard-red",
-                                                        statusString === "pending" &&
+                                                        statusString ===
+                                                            "pending" &&
                                                             "bg-dashboard-light-orange text-dashboard-orange"
                                                     )}
                                                 >
-                                                    {statusString === "approved" && <Check className="h-3 w-3" />}
-                                                    {statusString === "rejected" && <X className="h-3 w-3" />}
-                                                    {statusString === "pending" && <Clock className="h-3 w-3" />}
+                                                    {statusString ===
+                                                        "approved" && (
+                                                        <Check className="h-3 w-3" />
+                                                    )}
+                                                    {statusString ===
+                                                        "rejected" && (
+                                                        <X className="h-3 w-3" />
+                                                    )}
+                                                    {statusString ===
+                                                        "pending" && (
+                                                        <Clock className="h-3 w-3" />
+                                                    )}
 
-                                                    {statusString.charAt(0).toUpperCase() + statusString.slice(1)}
+                                                    {statusString
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        statusString.slice(1)}
                                                 </Badge>
                                             </TableCell>
 
-                                            <TableCell>{formatDate(deck.createdAt)}</TableCell>
+                                            <TableCell>
+                                                {formatDate(deck.createdAt)}
+                                            </TableCell>
 
                                             <TableCell className="text-right">
                                                 <Link to={`/review/${deck.id}`}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                    >
                                                         <ExternalLink className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
@@ -252,7 +317,9 @@ const Decks = () => {
                                 <Button
                                     variant="outline"
                                     disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                    onClick={() =>
+                                        setCurrentPage(currentPage - 1)
+                                    }
                                 >
                                     Previous
                                 </Button>
@@ -260,8 +327,14 @@ const Decks = () => {
                                 {[...Array(totalPages)].map((_, index) => (
                                     <Button
                                         key={index}
-                                        variant={currentPage === index + 1 ? "default" : "outline"}
-                                        onClick={() => setCurrentPage(index + 1)}
+                                        variant={
+                                            currentPage === index + 1
+                                                ? "default"
+                                                : "outline"
+                                        }
+                                        onClick={() =>
+                                            setCurrentPage(index + 1)
+                                        }
                                         className="w-10"
                                     >
                                         {index + 1}
@@ -271,7 +344,9 @@ const Decks = () => {
                                 <Button
                                     variant="outline"
                                     disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                    onClick={() =>
+                                        setCurrentPage(currentPage + 1)
+                                    }
                                 >
                                     Next
                                 </Button>
