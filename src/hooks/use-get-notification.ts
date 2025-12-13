@@ -24,7 +24,7 @@ export function usePublicDeckRequestNotifications(hiddenIds: string[] = [], enab
       if (!token) throw new Error("No token found");
 
       const res = await api.get<{ all: PublicDeckRequestNotificationType[] }>(
-  "/api/deck/notifications",
+  "api/deck/notifications",
   {
     headers: { Authorization: token },
     params: { hiddenIds: hiddenIds.join(',') },
