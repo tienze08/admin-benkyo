@@ -23,12 +23,15 @@ export function usePublicDeckRequestNotifications(hiddenIds: string[] = [], enab
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
-      const res = await api.get("/api/deck/notifications", {
-        headers: { Authorization: token },
-        params: { hiddenIds: hiddenIds.join(',') }, 
-      });
+      const res = await api.get<{ all: PublicDeckRequestNotificationType[] }>(
+  "/api/deck/notifications",
+  {
+    headers: { Authorization: token },
+    params: { hiddenIds: hiddenIds.join(',') },
+  }
+);
 
-      return res.data.all as PublicDeckRequestNotificationType[];
+      return res.data.all;
     },
     enabled
   });
