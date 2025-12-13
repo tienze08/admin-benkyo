@@ -81,8 +81,6 @@ const Notifications = () => {
           setRejectingId(null);
           setRejectReason("");
 
-          // Không reload trang — chỉ invalidate
-          queryClient.invalidateQueries(["pendingPayout"]);
         },
       }
     );
@@ -188,13 +186,7 @@ const Notifications = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <button
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                    onClick={() => alert("Approve API chưa implement")}
-                  >
-                    Approve
-                  </button>
-
+                
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded-lg"
                     onClick={() => setRejectingId(payout._id)}
