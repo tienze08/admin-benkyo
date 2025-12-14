@@ -282,7 +282,7 @@ const Packages = () => {
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select package type" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-background border border-sidebar-border shadow-lg z-50">
                                             {PACKAGE_TYPES.map((type) => (
                                                 <SelectItem
                                                     key={type.value}
@@ -324,7 +324,7 @@ const Packages = () => {
                                         <SelectTrigger className="bg-white">
                                             <SelectValue placeholder="Select duration" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-background border border-sidebar-border shadow-lg z-50">
                                             {PACKAGE_DURATIONS.map(
                                                 (duration) => (
                                                     <SelectItem
@@ -439,8 +439,8 @@ const Packages = () => {
                                             <TableCell>
                                                 {getDurationLabel(pkg.duration)}
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="max-w-xs">
+                                            <TableCell className="whitespace-normal">
+                                                <div className="max-w-xs break-words text-sm text-muted-foreground">
                                                     {Array.isArray(pkg.features)
                                                         ? pkg.features.join(
                                                               ", "
@@ -448,6 +448,7 @@ const Packages = () => {
                                                         : pkg.features}
                                                 </div>
                                             </TableCell>
+
                                             <TableCell>
                                                 <span
                                                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -588,7 +589,7 @@ const Packages = () => {
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select package type" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white">
+                                    <SelectContent className="bg-background border border-sidebar-border shadow-lg z-50">
                                         {PACKAGE_TYPES.map((type) => (
                                             <SelectItem
                                                 key={type.value}
@@ -632,7 +633,7 @@ const Packages = () => {
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select duration" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white">
+                                    <SelectContent className="bg-background border border-sidebar-border shadow-lg z-50">
                                         {PACKAGE_DURATIONS.map((duration) => (
                                             <SelectItem
                                                 key={duration.value}
