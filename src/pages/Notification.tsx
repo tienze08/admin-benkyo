@@ -7,11 +7,10 @@ import { useRejectPayout } from "@/hooks/use-reject-payout";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   // --- FLASHCARD NOTIFICATIONS ---
   const { data: notifications = [], isLoading, error } =
