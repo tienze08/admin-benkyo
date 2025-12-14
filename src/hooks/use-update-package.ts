@@ -19,7 +19,7 @@ export const useUpdatePackage = () => {
     mutationFn: async (data: UpdatePackageData) => {
       const { id, ...updateData } = data;
 
-      const response = await api.put(`/api/package/${id}`, updateData, {
+      const response = await api.put(`api/package/${id}`, updateData, {
         headers: {
           Authorization: token,
         },

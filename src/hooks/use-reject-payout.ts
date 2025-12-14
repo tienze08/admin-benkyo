@@ -13,7 +13,7 @@ export function useRejectPayout() {
   return useMutation({
     mutationFn: async ({ transactionId, reason }: RejectPayload) => {
       const res = await api.post(
-        "/api/payment/payout/reject",
+        "api/payment/payout/reject",
         { transactionId, reason },
         {
           headers: {

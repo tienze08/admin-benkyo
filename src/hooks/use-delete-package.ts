@@ -8,7 +8,7 @@ export const useDeletePackage = () => {
 
   return useMutation({
     mutationFn: async (packageId: string) => {
-      await api.delete(`/api/package/${packageId}`, {
+      await api.delete(`api/package/${packageId}`, {
         headers: {
           Authorization: token,
         },

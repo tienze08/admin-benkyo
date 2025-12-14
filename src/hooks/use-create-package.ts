@@ -16,7 +16,7 @@ export const useCreatePackage = () => {
 
   return useMutation({
     mutationFn: async (newPackage: NewPackage) => {
-      const response = await api.post("/api/package", newPackage, {
+      const response = await api.post("api/package", newPackage, {
         headers: {
           Authorization: token,
         },

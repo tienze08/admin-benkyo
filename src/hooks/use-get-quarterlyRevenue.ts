@@ -23,7 +23,7 @@ export function useQuarterlyRevenue(year: string) {
       if (!token) throw new Error("No token found");
 
       const response = await api.get<RawQuarterlyRevenueItem[]>(
-        `/api/payment/quarterlyRevenue?year=${year}`,
+        `api/payment/quarterlyRevenue?year=${year}`,
         {
           headers: {
             Authorization: token,
