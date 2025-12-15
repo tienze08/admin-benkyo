@@ -46,7 +46,7 @@ const Notifications = () => {
         );
     }
 
-    // --- FILTER NOTIFICATIONS ---
+    // --- FILTER ---
     const filteredNotifications = notifications.filter((n) => {
         const term = searchTerm.toLowerCase();
         return (
@@ -67,8 +67,7 @@ const Notifications = () => {
         navigate(`/review/${deckId}`);
     };
 
-    // --- HANDLE REJECT ---
-    const submitReject = async () => {
+    const submitReject = () => {
         if (!rejectReason.trim()) {
             alert("Reason is required");
             return;
@@ -88,8 +87,9 @@ const Notifications = () => {
 
     return (
         <DashboardLayout>
-            <div className="mb-10">
-                <h1 className="text-3xl font-bold mb-4">Deck Notifications</h1>
+            {/* ================= NOTIFICATIONS ================= */}
+            <section className="mb-12">
+                <h1 className="text-3xl font-bold mb-6">Notifications</h1>
 
                 <input
                     type="text"
@@ -99,49 +99,70 @@ const Notifications = () => {
                         setSearchTerm(e.target.value);
                         setCurrentPage(1);
                     }}
-                    className="border rounded-lg p-2 w-full max-w-md mb-4"
+                    className="
+                        w-full max-w-md mb-6
+                        border border-gray-300 rounded-xl
+                        px-4 py-2
+                        focus:outline-none focus:ring-2 focus:ring-purple-400
+                    "
                 />
-                <h2 className="text-3xl font-bold mb-4">Public Deck Request</h2>
-                <div className="flex flex-col gap-6">
+
+                <h2 className="text-2xl font-semibold mb-4">
+                    Public Deck Requests
+                </h2>
+
+                <div className="flex flex-col gap-4">
                     {currentNotifications.map((n) => (
                         <div
                             key={n.deckId}
                             onClick={() => handleClickDeck(n.deckId)}
-                            className="border rounded-2xl bg-purple-100 hover:bg-purple-200 cursor-pointer p-5"
+                            className="
+                                group cursor-pointer
+                                bg-white border border-gray-200
+                                rounded-2xl p-5
+                                flex gap-4
+                                transition-all duration-200
+                                hover:shadow-md hover:-translate-y-0.5
+                            "
                         >
-                            <div className="flex gap-4">
-                                <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden">
-                                    {n.actorAvatar ? (
-                                        <img
-                                            src={n.actorAvatar}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="flex items-center justify-center h-full text-xl font-bold">
-                                            {n.actorName
-                                                .charAt(0)
-                                                .toUpperCase()}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="flex-1">
-                                    <div className="text-lg">{n.message}</div>
-                                    <div className="text-gray-600 text-sm">
-                                        Deck: <b>{n.deckTitle}</b>
-                                    </div>
-                                    <div className="text-gray-500 text-xs mt-1">
-                                        Actor: {n.actorName}
-                                    </div>
-                                </div>
+                            {/* Avatar */}
+                            <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center overflow-hidden shrink-0">
+                                {n.actorAvatar ? (
+                                    <img
+                                        src={n.actorAvatar}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-lg font-bold text-purple-600">
+                                        {n.actorName.charAt(0).toUpperCase()}
+                                    </span>
+                                )}
                             </div>
 
-                            <div className="text-gray-600 text-xs mt-2 flex gap-1 items-center">
-                                ⏱{" "}
-                                {formatDistanceToNow(new Date(n.sortTime), {
-                                    addSuffix: true,
-                                    locale: vi,
-                                })}
+                            {/* Content */}
+                            <div className="flex-1">
+                                <div className="flex justify-between items-center">
+                                    <p className="font-semibold text-gray-800 group-hover:text-purple-600">
+                                        {n.actorName}
+                                    </p>
+                                    <span className="text-xs text-gray-400">
+                                        {formatDistanceToNow(
+                                            new Date(n.sortTime),
+                                            {
+                                                addSuffix: true,
+                                                locale: vi,
+                                            }
+                                        )}
+                                    </span>
+                                </div>
+
+                                <p className="text-gray-700 mt-1">
+                                    {n.message}
+                                </p>
+
+                                <div className="mt-2 inline-flex items-center gap-1 text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                                    📘 <span>{n.deckTitle}</span>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -149,15 +170,15 @@ const Notifications = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex justify-center mt-6 gap-2">
+                    <div className="flex justify-center mt-8 gap-2">
                         {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setCurrentPage(i + 1)}
-                                className={`px-4 py-2 rounded-lg border ${
+                                className={`px-4 py-2 rounded-xl border transition ${
                                     currentPage === i + 1
-                                        ? "bg-purple-500 text-white"
-                                        : "bg-white"
+                                        ? "bg-purple-500 text-white border-purple-500"
+                                        : "bg-white hover:bg-gray-100"
                                 }`}
                             >
                                 {i + 1}
@@ -165,10 +186,11 @@ const Notifications = () => {
                         ))}
                     </div>
                 )}
-            </div>
+            </section>
 
-            <div>
-                <h2 className="text-3xl font-bold mb-4">Pending Payouts</h2>
+            {/* ================= PENDING PAYOUTS ================= */}
+            <section>
+                <h2 className="text-2xl font-semibold mb-4">Pending Payouts</h2>
 
                 {pendingPayouts.length === 0 && (
                     <p className="text-gray-600">No pending payout requests</p>
@@ -178,67 +200,79 @@ const Notifications = () => {
                     {pendingPayouts.map((payout) => (
                         <div
                             key={payout._id}
-                            className="border rounded-xl p-5 shadow-sm bg-white"
+                            className="
+                                bg-white border border-gray-200
+                                rounded-2xl p-5
+                                shadow-sm
+                                flex justify-between items-center
+                            "
                         >
-                            <div className="flex justify-between">
-                                <div>
-                                    <p className="font-bold text-lg">
-                                        {payout.user.name}
-                                    </p>
-                                    <p className="text-gray-600">
-                                        {payout.user.email}
-                                    </p>
+                            <div>
+                                <p className="font-semibold text-lg">
+                                    {payout.user.name}
+                                </p>
+                                <p className="text-gray-600">
+                                    {payout.user.email}
+                                </p>
 
-                                    <p className="mt-2">
-                                        Amount: <b>${payout.amount}</b>
-                                    </p>
+                                <p className="mt-2">
+                                    Amount:{" "}
+                                    <b className="text-purple-600">
+                                        ${payout.amount}
+                                    </b>
+                                </p>
 
-                                    <p className="text-gray-600 text-sm">
-                                        Requested:{" "}
-                                        {formatDistanceToNow(
-                                            new Date(payout.createdAt),
-                                            {
-                                                addSuffix: true,
-                                                locale: vi,
-                                            }
-                                        )}
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <button
-                                        className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                                        onClick={() =>
-                                            setRejectingId(payout._id)
+                                <p className="text-gray-500 text-sm">
+                                    Requested{" "}
+                                    {formatDistanceToNow(
+                                        new Date(payout.createdAt),
+                                        {
+                                            addSuffix: true,
+                                            locale: vi,
                                         }
-                                    >
-                                        Reject
-                                    </button>
-                                </div>
+                                    )}
+                                </p>
                             </div>
+
+                            <button
+                                className="
+                                    px-4 py-2
+                                    bg-red-500 text-white
+                                    rounded-xl
+                                    hover:bg-red-600
+                                "
+                                onClick={() => setRejectingId(payout._id)}
+                            >
+                                Reject
+                            </button>
                         </div>
                     ))}
                 </div>
-            </div>
+            </section>
 
+            {/* ================= REJECT MODAL ================= */}
             {rejectingId && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-                        <h3 className="font-bold text-xl mb-3">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg">
+                        <h3 className="text-xl font-bold mb-4">
                             Reject Payout
                         </h3>
 
                         <textarea
-                            placeholder="Enter reject reason..."
-                            className="border p-3 w-full rounded-lg"
                             rows={4}
+                            placeholder="Enter reject reason..."
+                            className="
+                                w-full border border-gray-300
+                                rounded-xl p-3
+                                focus:outline-none focus:ring-2 focus:ring-red-400
+                            "
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
                         />
 
-                        <div className="flex justify-end gap-3 mt-4">
+                        <div className="flex justify-end gap-3 mt-5">
                             <button
-                                className="px-4 py-2 bg-gray-300 rounded-lg"
+                                className="px-4 py-2 rounded-xl bg-gray-200"
                                 onClick={() => {
                                     setRejectingId(null);
                                     setRejectReason("");
@@ -246,9 +280,8 @@ const Notifications = () => {
                             >
                                 Cancel
                             </button>
-
                             <button
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                                className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600"
                                 onClick={submitReject}
                             >
                                 Submit Reject

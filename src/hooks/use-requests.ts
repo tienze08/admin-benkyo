@@ -11,7 +11,7 @@ export function useRequests() {
     queryKey: ["requests"],
     queryFn: async () => {
         
-      const response = await api.get<any[]>("api/decks/public-requests", {
+      const response = await api.get<any[]>("/api/decks/public-requests", {
         headers: {
           Authorization: `${token}`,
         },
