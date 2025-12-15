@@ -109,6 +109,7 @@ export default function WithdrawalsUI() {
                     <TableHead>Date</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Account</TableHead>
+                      <TableHead>Bank</TableHead>
                     <TableHead>User Notes</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -140,6 +141,9 @@ export default function WithdrawalsUI() {
                           {req.payout.accountNumber})
                         </div>
                       </TableCell>
+ <TableCell>
+                      {req.payout.bankAbbreviation} ({req.payout.accountNumber})
+                    </TableCell>
 
                       <TableCell className="max-w-[220px] truncate">
                         {req.payout?.notes || "-"}
@@ -208,9 +212,9 @@ export default function WithdrawalsUI() {
                     <TableCell>
                       <div className="font-medium">{req.user.name}</div>
                     </TableCell>
-
+{/* /// */}
                     <TableCell>
-                      {req.payout.accountName} ({req.payout.accountNumber})
+                      {req.payout.bankAbbreviation} ({req.payout.accountNumber})
                     </TableCell>
 
                     <TableCell>

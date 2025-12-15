@@ -7,6 +7,7 @@ export interface UserInfo {
 }
 
 export interface Payout {
+  bankName?: string;
   bankAbbreviation?: string;
   accountNumber?: string;
   accountName?: string;
