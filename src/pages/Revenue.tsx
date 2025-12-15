@@ -11,7 +11,15 @@ import {
     Tooltip,
     Legend,
 } from "recharts";
-import { DollarSign, TrendingUp, CreditCard, Users } from "lucide-react";
+import {
+    DollarSign,
+    TrendingUp,
+    CreditCard,
+    Users,
+    Package,
+    Wallet,
+    ArrowDownCircle,
+} from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -26,51 +34,50 @@ import { useQuarterlyRevenue } from "@/hooks/use-get-quarterlyRevenue";
 import { useState, useMemo } from "react";
 
 const Revenue = () => {
-    // State must be declared first before using in hooks
-    const [selectedYear, setSelectedYear] = useState(() =>
+    const [selectedYear, setSelectedYear] = useState(
         new Date().getFullYear().toString()
     );
 
-    // Generate the last 3 years dynamically
     const availableYears = useMemo(() => {
         const currentYear = new Date().getFullYear();
-        return Array.from({ length: 3 }, (_, index) => currentYear - index);
+        return Array.from({ length: 3 }, (_, i) => currentYear - i);
     }, []);
 
-    // Now we can use selectedYear in hooks
     const { data: metrics, isLoading: isLoadingMetrics } =
         useDashboardMetrics(selectedYear);
+
     const { data: monthlyRevenue = [] } = useMonthlyRevenue(selectedYear) as {
         data: { name: string; revenue: number }[] | undefined;
     };
 
-    console.log("Monthly Revenue Data:", monthlyRevenue);
     const {
         data: quarterlyRevenue = [],
         isLoading: isLoadingQuarterly,
         error: quarterlyError,
     } = useQuarterlyRevenue(selectedYear);
 
-    const totalRevenue = metrics?.totalRevenue ?? 0;
-    const averageMonthlyRevenue = metrics?.monthlyAverage ?? 0;
-    const arpu = metrics?.arpu ?? 0;
-    const mrr = metrics?.mrr ?? 0;
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat("vi-VN", {
+    /* ================= FORMAT ================= */
+    const formatCurrency = (value: number) =>
+        new Intl.NumberFormat("vi-VN", {
             style: "currency",
             currency: "VND",
             minimumFractionDigits: 0,
         }).format(value);
-    };
 
-    const handleYearChange = (year: string) => {
-        setSelectedYear(year);
-    };
+    /* ================= KPI ================= */
+    const totalRevenue = metrics?.totalRevenue ?? 0;
+    const monthlyAverage = metrics?.monthlyAverage ?? 0;
+    const arpu = metrics?.arpu ?? 0;
+    const mrr = metrics?.mrr ?? 0;
+
+    const packageRevenue = metrics?.packageRevenue ?? 0;
+    const topupRevenue = metrics?.topupRevenue ?? 0;
+    const payoutRevenue = metrics?.payoutRevenue ?? 0;
 
     return (
         <DashboardLayout>
             <div className="space-y-8">
+                {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight">
@@ -80,188 +87,92 @@ const Revenue = () => {
                             Financial performance and revenue analytics.
                         </p>
                     </div>
+
                     <Select
                         value={selectedYear}
-                        onValueChange={handleYearChange}
+                        onValueChange={setSelectedYear}
                     >
                         <SelectTrigger className="w-[180px] border-sidebar-border">
-                            <SelectValue placeholder="Select Year" />
+                            <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="w-[180px] border-sidebar-border bg-purple-50">
+                        <SelectContent className="bg-purple-50">
                             {availableYears.map((year) => (
                                 <SelectItem
                                     key={year}
                                     value={year.toString()}
-                                    className="cursor-pointer"
                                 >
                                     {year}
-                                    {year === new Date().getFullYear() && (
-                                        <span className="ml-2 text-xs text-purple-600 font-medium">
-                                            (Current)
-                                        </span>
-                                    )}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
 
-                {/* Metrics Cards */}
+                {/* ================= KPI – CŨ (GIỮ NGUYÊN) ================= */}
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="border-sidebar-border">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Total Revenue
-                            </CardTitle>
-                            <div className="h-8 w-8 rounded-full bg-dashboard-light-purple p-1.5">
-                                <DollarSign className="h-full w-full text-dashboard-purple" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingMetrics
-                                    ? "Loading..."
-                                    : formatCurrency(totalRevenue)}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-sidebar-border">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Monthly Average
-                            </CardTitle>
-                            <div className="h-8 w-8 rounded-full bg-dashboard-light-blue p-1.5">
-                                <TrendingUp className="h-full w-full text-dashboard-blue" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingMetrics
-                                    ? "Loading..."
-                                    : formatCurrency(averageMonthlyRevenue)}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2 flex items-center">
-                                Per month ({selectedYear})
-                                {isLoadingMetrics ? (
-                                    <span className="ml-1 text-gray-400">
-                                        Loading...
-                                    </span>
-                                ) : (
-                                    <span
-                                        className={`ml-1 inline-flex items-center ${
-                                            (metrics?.monthlyAverageChange ??
-                                                0) >= 0
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                        }`}
-                                    >
-                                        {(metrics?.monthlyAverageChange ?? 0) >=
-                                        0
-                                            ? "↑"
-                                            : "↓"}{" "}
-                                        {Math.abs(
-                                            metrics?.monthlyAverageChange ?? 0
-                                        )}
-                                        %
-                                    </span>
-                                )}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-sidebar-border">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                ARPU
-                            </CardTitle>
-                            <div className="h-8 w-8 rounded-full bg-dashboard-light-green p-1.5">
-                                <Users className="h-full w-full text-dashboard-green" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingMetrics
-                                    ? "Loading..."
-                                    : formatCurrency(arpu)}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2 flex items-center">
-                                Average revenue per user
-                                {isLoadingMetrics ? (
-                                    <span className="ml-1 text-gray-400">
-                                        Loading...
-                                    </span>
-                                ) : (
-                                    <span
-                                        className={`ml-1 inline-flex items-center ${
-                                            (metrics?.arpuChange ?? 0) >= 0
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                        }`}
-                                    >
-                                        {(metrics?.arpuChange ?? 0) >= 0
-                                            ? "↑"
-                                            : "↓"}{" "}
-                                        {Math.abs(metrics?.arpuChange ?? 0)}%
-                                    </span>
-                                )}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-sidebar-border">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                MRR
-                            </CardTitle>
-                            <div className="h-8 w-8 rounded-full bg-dashboard-light-orange p-1.5">
-                                <CreditCard className="h-full w-full text-dashboard-orange" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingMetrics
-                                    ? "Loading..."
-                                    : formatCurrency(mrr)}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2 flex items-center">
-                                Monthly recurring revenue
-                                {isLoadingMetrics ? (
-                                    <span className="ml-1 text-gray-400">
-                                        Loading...
-                                    </span>
-                                ) : (
-                                    <span
-                                        className={`ml-1 inline-flex items-center ${
-                                            (metrics?.mrrChange ?? 0) >= 0
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                        }`}
-                                    >
-                                        {(metrics?.mrrChange ?? 0) >= 0
-                                            ? "↑"
-                                            : "↓"}{" "}
-                                        {Math.abs(metrics?.mrrChange ?? 0)}%
-                                    </span>
-                                )}
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <MetricCard
+                        title="Total Revenue"
+                        value={totalRevenue}
+                        icon={<DollarSign />}
+                        bg="purple"
+                        loading={isLoadingMetrics}
+                    />
+                    <MetricCard
+                        title="Monthly Average"
+                        value={monthlyAverage}
+                        icon={<TrendingUp />}
+                        bg="blue"
+                        loading={isLoadingMetrics}
+                    />
+                    <MetricCard
+                        title="ARPU"
+                        value={arpu}
+                        icon={<Users />}
+                        bg="green"
+                        loading={isLoadingMetrics}
+                    />
+                    <MetricCard
+                        title="MRR"
+                        value={mrr}
+                        icon={<CreditCard />}
+                        bg="orange"
+                        loading={isLoadingMetrics}
+                    />
                 </div>
 
-                {/* Charts Tabs */}
-                <Tabs defaultValue="monthly" className="w-full">
-                    <TabsList className="grid w-full md:w-[400px] grid-cols-2 border-sidebar-border bg-purple-50 text-sidebar-accent-foreground">
-                        <TabsTrigger
-                            value="monthly"
-                            className="hover:bg-dashboard-light-purple/40 data-[state=active]:bg-dashboard-light-purple data-[state=active]:text-sidebar-foreground cursor-pointer"
-                        >
+                {/* ================= KPI – THEO TRANSACTION ================= */}
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                    <MetricCard
+                        title="Package Revenue"
+                        value={packageRevenue}
+                        icon={<Package />}
+                        bg="purple"
+                        loading={isLoadingMetrics}
+                    />
+                    <MetricCard
+                        title="Topup Revenue"
+                        value={topupRevenue}
+                        icon={<Wallet />}
+                        bg="blue"
+                        loading={isLoadingMetrics}
+                    />
+                    <MetricCard
+                        title="Payout"
+                        value={payoutRevenue}
+                        icon={<ArrowDownCircle />}
+                        bg="red"
+                        negative
+                        loading={isLoadingMetrics}
+                    />
+                </div>
+
+                {/* ================= CHART – GIỮ NGUYÊN ================= */}
+                <Tabs defaultValue="monthly">
+                    <TabsList className="grid w-full md:w-[400px] grid-cols-2 border-sidebar-border bg-purple-50">
+                        <TabsTrigger value="monthly">
                             Monthly
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="quarterly"
-                            className="hover:bg-dashboard-light-purple/40 data-[state=active]:bg-dashboard-light-purple data-[state=active]:text-sidebar-foreground cursor-pointer"
-                        >
+                        <TabsTrigger value="quarterly">
                             Quarterly
                         </TabsTrigger>
                     </TabsList>
@@ -275,7 +186,7 @@ const Revenue = () => {
                         </CardContent>
                     </TabsContent>
 
-                    <TabsContent value="quarterly" className="mt-4">
+                     <TabsContent value="quarterly" className="mt-4">
                         <Card className="border-sidebar-border">
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>
@@ -403,3 +314,55 @@ const Revenue = () => {
 };
 
 export default Revenue;
+
+const MetricCard = ({
+    title,
+    value,
+    icon,
+    bg,
+    loading,
+    negative,
+}: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    bg: "purple" | "blue" | "green" | "orange" | "red";
+    loading?: boolean;
+    negative?: boolean;
+}) => {
+    const bgMap = {
+        purple: "bg-dashboard-light-purple text-dashboard-purple",
+        blue: "bg-dashboard-light-blue text-dashboard-blue",
+        green: "bg-dashboard-light-green text-dashboard-green",
+        orange: "bg-dashboard-light-orange text-dashboard-orange",
+        red: "bg-red-100 text-red-600",
+    };
+
+    return (
+        <Card className="border-sidebar-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                    {title}
+                </CardTitle>
+                <div className={`h-8 w-8 rounded-full p-1.5 ${bgMap[bg]}`}>
+                    {icon}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div
+                    className={`text-2xl font-bold ${
+                        negative ? "text-red-600" : ""
+                    }`}
+                >
+                    {loading
+                        ? "Loading..."
+                        : new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                              minimumFractionDigits: 0,
+                          }).format(value)}
+                </div>
+            </CardContent>
+        </Card>
+    );
+};

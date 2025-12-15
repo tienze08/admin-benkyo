@@ -5,14 +5,14 @@ interface RawQuarterlyRevenueItem {
   name: string;
   Basic?: number;
   Pro?: number;
-  Enterprise?: number;
+  Premium?: number;
 }
 
 export interface QuarterlyRevenueItem {
   name: string;
   basic: number;
   pro: number;
-  enterprise: number;
+  premium: number;
 }
 
 export function useQuarterlyRevenue(year: string) {
@@ -35,7 +35,7 @@ export function useQuarterlyRevenue(year: string) {
         name: item.name,
         basic: item.Basic ?? 0,
         pro: item.Pro ?? 0,
-        enterprise: item.Enterprise ?? 0,
+        premium: item.Premium ?? 0,
       }));
     },
     staleTime: 1000 * 60 * 5,
