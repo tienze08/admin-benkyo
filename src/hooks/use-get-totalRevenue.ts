@@ -5,13 +5,21 @@ import { api } from "@/lib/api";
 export interface RevenueStats {
   totalRevenue: number;
   totalRevenueChange: number;
+
+  packageRevenue: number;
+  topupRevenue: number;
+  payoutRevenue: number;
+
   monthlyAverage: number;
   monthlyAverageChange: number;
+
   arpu: number;
   arpuChange: number;
+
   mrr: number;
   mrrChange: number;
 }
+
 
 
 export function useDashboardMetrics(year: string) {
