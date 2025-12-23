@@ -35,7 +35,6 @@ const Decks = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -63,7 +62,6 @@ const Decks = () => {
         rejected: 3,
     };
 
-    // FILTER
     const filteredDecks = decks.filter((deck) => {
         const matchesSearch =
             deck.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,21 +74,28 @@ const Decks = () => {
 
         return matchesSearch && matchesStatus;
     });
+const sortedDecks = [...filteredDecks].sort((a, b) => {
+    if (a.status === 1 && b.status !== 1) return -1;
+    if (a.status !== 1 && b.status === 1) return 1;
+    return (
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
+    );
+});
 
-    // RESET PAGE WHEN FILTER CHANGES
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, statusFilter]);
 
-    // PAGINATION CALCULATION
-    const totalItems = filteredDecks.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+const totalItems = sortedDecks.length;
+const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedDecks = filteredDecks.slice(
-        startIndex,
-        startIndex + itemsPerPage
-    );
+const startIndex = (currentPage - 1) * itemsPerPage;
+const paginatedDecks = sortedDecks.slice(
+    startIndex,
+    startIndex + itemsPerPage
+);
+
 
     return (
         <DashboardLayout>
@@ -107,7 +112,7 @@ const Decks = () => {
                     </div>
                 </div>
 
-                {/* STAT CARDS */}
+
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
                     <Card className="border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -207,7 +212,6 @@ const Decks = () => {
                             </Select>
                         </div>
 
-                        {/* TABLE CONTENT */}
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-sidebar-border">
@@ -288,7 +292,6 @@ const Decks = () => {
                             </TableBody>
                         </Table>
 
-                        {/* PAGINATION */}
                         <div className="flex justify-between items-center mt-4">
                             <span className="text-sm text-muted-foreground">
                                 Page {currentPage} of {totalPages}
